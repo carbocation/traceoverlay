@@ -86,6 +86,15 @@ function start(e) {
     lastX = pos.x;
     lastY = pos.y;
 
+    points.push({
+        x: pos.x,
+        y: pos.y,
+        brush: brush,
+        size: brushSize,
+        color: brushColor,
+        mode: "begin"
+    });
+
     if(brush == "fill") {
         console.log("Fill");
 
@@ -93,7 +102,7 @@ function start(e) {
         var rect = newLocal;
 
         // TODO: Figure out how to use the same color object for fill and draw
-        floodFill({r: 0x00, g: 0x0, b: 0xff, a: 0xff}, pos.x, pos.y);
+        floodFill({r: 0x00, g: 0x00, b: 0xff, a: 0xff}, pos.x, pos.y);
         // floodFill(brushColor, pos.x, pos.y);
 
         mouseDown = false;
@@ -109,15 +118,6 @@ function start(e) {
     }
 
     context.moveTo(pos.x, pos.y);
-
-    points.push({
-        x: pos.x,
-        y: pos.y,
-        brush: brush,
-        size: brushSize,
-        color: brushColor,
-        mode: "begin"
-    });
 
     mouseDown = true;
 }
@@ -223,6 +223,11 @@ function redrawAll() {
 
         if(pt.brush == "eraser") {
             context.globalCompositeOperation="destination-out";
+        } else if(pt.brush == "fill") {
+            context.globalCompositeOperation="source-over";
+            // TODO: Figure out how to use the same color object for fill and draw
+            floodFill({r: 0x00, g: 0xff, b: 0x00, a: 0xff}, pt.x, pt.y);
+            continue;
         } else {
             context.globalCompositeOperation="source-over";
         }

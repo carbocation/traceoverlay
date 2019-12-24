@@ -13,7 +13,7 @@ function floodFill(newColor, x, y) {
         return
     }
 
-    console.log(baseColor, newColor);
+    // console.log(baseColor, newColor);
 
     // Add the clicked location to stack
     stack.push({ x: operator.x, y: operator.y })
