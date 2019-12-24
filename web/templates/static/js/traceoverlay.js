@@ -5,14 +5,16 @@ var canvas = document.getElementById("imgCanvas");
 var context = canvas.getContext("2d");
 context.globalAlpha = 1.0;
 context.imageSmoothingEnabled = false;
-// context.fillStyle = "rgba(0, 0, 0, 1)";
-context.fillStyle = "#ff0000";
-context.strokeStyle = "#ff0000";
+context.fillStyle = "rgba(255, 0, 0, 1)";
+// context.fillStyle = "#ff0000";
+// context.strokeStyle = "#ff0000";
+var previewAlpha = 196;
+var saveAlpha = 255;
 
 // Brush variables
 var brush = "stroke";
 var brushSize = 1;
-var brushColor = "#FF0000"; //{r:0xff, g:0x00, b:0x00, a:0xff}; //"#FF0000";
+var brushColor = "rgba(255, 0, 0, 1)"; //"#FF0000"; //{r:0xff, g:0x00, b:0x00, a:0xff}; //"#FF0000";
 
 // Undo
 var lastX;
@@ -61,7 +63,7 @@ function stop(e) {
     if(!mouseDown) {
         return
     }
-    fullyShade();
+    fullyShade(previewAlpha);
 
     var pos = getMousePos(canvas, e);
 
@@ -155,10 +157,16 @@ canvas.addEventListener('mouseup', stop, false);
 canvas.addEventListener('mousedown', start, false);
 
 function saveCanvas() {
+    // context.globalAlpha = 1.0;
+    fullyShade(saveAlpha);
+
     var base64Image = CanvasToBMP.toDataURL(document.getElementById('imgCanvas'));
 
     document.getElementById("imgBase64").value = base64Image;
     document.getElementById("saveImage").submit();
+
+    // Reset our alpha
+    fullyShade(previewAlpha);
 }
 
 function ajaxSaveCanvas(imageIndex) {
@@ -186,7 +194,8 @@ function downloadCanvas() {
     return
 }
 
-function fullyShade() {
+// shadeAlpha is an int from 0-255
+function fullyShade(shadeAlpha) {
     var imageData = context.getImageData(0,0,canvas.width, canvas.height);
     var pixels = imageData.data;
     var numPixels = pixels.length;
@@ -197,7 +206,7 @@ function fullyShade() {
         if (pixels[i*4+3] <= 1) {
             pixels[i*4+3] = 0;
         } else {
-            pixels[i*4+3] = 255;
+            pixels[i*4+3] = shadeAlpha;
         }
     }
     context.putImageData(imageData, 0, 0);
@@ -247,8 +256,6 @@ function redrawAll() {
         context.stroke();
     }
 
-    fullyShade();
-
     // console.log("Finished re-drawing");
 }
 
@@ -259,6 +266,7 @@ document.getElementById("undo").addEventListener('mousedown', undoStart, false);
 
 function undoStop() {
     clearInterval(interval);
+    fullyShade(previewAlpha);
 }
 
 function undoStart() {
