@@ -79,10 +79,10 @@ function getColorAtPixel(imageData, x, y) {
 function setColorAtPixel(imageData, color, x, y) {
     const { width, data } = imageData
 
-    console.log(color)
-    console.log(color.r)
-    console.log(color.a)
-    console.log(color.a & 0xff)
+    // console.log(color)
+    // console.log(color.r)
+    // console.log(color.a)
+    // console.log(color.a & 0xff)
 
     data[4 * (width * y + x) + 0] = color.r & 0xff
     data[4 * (width * y + x) + 1] = color.g & 0xff

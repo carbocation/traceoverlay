@@ -17,6 +17,7 @@ type Manifest struct {
 	HasOverlayFromProject bool
 }
 
+// TODO: Pick a smarter algorithm here
 func UpdateManifest() error {
 	global.m.Lock()
 	defer global.m.Unlock()

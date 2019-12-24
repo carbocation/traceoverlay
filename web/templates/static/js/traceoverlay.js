@@ -5,12 +5,14 @@ var canvas = document.getElementById("imgCanvas");
 var context = canvas.getContext("2d");
 context.globalAlpha = 1.0;
 context.imageSmoothingEnabled = false;
-context.fillStyle = "rgba(0, 0, 0, 1)";
+// context.fillStyle = "rgba(0, 0, 0, 1)";
+context.fillStyle = "#ff0000";
+context.strokeStyle = "#ff0000";
 
 // Brush variables
 var brush = "stroke";
 var brushSize = 1;
-var brushColor = "#000000";
+var brushColor = "#FF0000"; //{r:0xff, g:0x00, b:0x00, a:0xff}; //"#FF0000";
 
 // Undo
 var lastX;
@@ -28,18 +30,37 @@ function getMousePos(canvas, evt) {
 }
 
 function setBrushSize(size) {
-    brush = "stroke";
+    if(brush == "fill") {
+        brush = "stroke";
+    }
+
     brushSize = size;
 }
 
 function setBrush(newBrush) {
     brush = newBrush;
+
+    if(brush == "eraser") {
+        // Via https://stackoverflow.com/a/25916334/199475
+        context.globalCompositeOperation="destination-out";
+        console.log("Creating transparent brush")
+        // context.fillStyle = "rgba(0, 0, 0, 0)";
+    } else {
+        context.globalCompositeOperation="source-over";
+        console.log("Creating opaque brush")
+        // context.fillStyle = "rgba(0, 0, 0, 1)";
+    }
 }
 
 // Handlers for the position of the mouse, and whether or not the mouse button
 // has been held down.
 var mouseDown = false;
+
+// Complete this line segment
 function stop(e) {
+    if(!mouseDown) {
+        return
+    }
     fullyShade();
 
     var pos = getMousePos(canvas, e);
@@ -58,6 +79,7 @@ function stop(e) {
     mouseDown = false;
 }
 
+// Initiate a new line segment or flood fill
 function start(e) {
     var pos = getMousePos(canvas, e);
 
@@ -70,7 +92,11 @@ function start(e) {
         const newLocal = canvas.getBoundingClientRect();
         var rect = newLocal;
 
-        floodFill({r: 0x0, g: 0x0, b: 0x0, a: 0xff}, pos.x, pos.y);
+        // TODO: Figure out how to use the same color object for fill and draw
+        floodFill({r: 0x00, g: 0x0, b: 0xff, a: 0xff}, pos.x, pos.y);
+        // floodFill(brushColor, pos.x, pos.y);
+
+        mouseDown = false;
 
         return false
     }
@@ -83,7 +109,7 @@ function start(e) {
     }
 
     context.moveTo(pos.x, pos.y);
-    
+
     points.push({
         x: pos.x,
         y: pos.y,
@@ -96,6 +122,7 @@ function start(e) {
     mouseDown = true;
 }
 
+// Continue drawing a line segment
 function draw(e) {
     if(!mouseDown) {
         return
@@ -103,7 +130,8 @@ function draw(e) {
 
     var pos = getMousePos(canvas, e);
 
-    //context.fillStyle = "#000000";
+    context.fillStyle = brushColor;
+    context.strokeStyle = brushColor;
 
     context.lineTo(pos.x, pos.y);
     context.stroke();
@@ -177,36 +205,44 @@ function fullyShade() {
 
 function redrawAll() {
 
+    // console.log("Redrawing " + points.length + " points");
+    // console.log(points[0]);
+    // console.log(points[1]);
+
     if (points.length == 0) {
         return;
     }
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
+    // console.log(context);
+
     for (var i = 0; i < points.length; i++) {
 
         var pt = points[i];
 
-        var begin = false;
+        if(pt.brush == "eraser") {
+            context.globalCompositeOperation="destination-out";
+        } else {
+            context.globalCompositeOperation="source-over";
+        }
 
         if (context.lineWidth != pt.size) {
             context.lineWidth = pt.size;
-            begin = true;
         }
-        if (context.strokeStyle != pt.color) {
+        if (context.strokeStyle != pt.color || context.fillStyle != pt.color) {
             context.strokeStyle = pt.color;
-            begin = true;
+            context.fillStyle = pt.color;
         }
-        if (pt.mode == "begin" || begin) {
+        if (pt.mode == "begin") { // || begin) {
             context.beginPath();
             context.moveTo(pt.x, pt.y);
         }
         context.lineTo(pt.x, pt.y);
-        if (pt.mode == "end" || (i == points.length - 1)) {
-            context.stroke();
-        }
+        context.stroke();
     }
-    context.stroke();
+
+    // console.log("Finished re-drawing");
 }
 
 var interval;

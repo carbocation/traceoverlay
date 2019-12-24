@@ -19,9 +19,12 @@
 {{define "page"}}
 <span>Project: <a href="/listproject">{{$.Data.Project}}</a>. Zip: {{$.Data.ManifestEntry.Zip}}. Dicom: {{$.Data.ManifestEntry.Dicom}}</span>
 <br />
-<button class="btn btn-primary" onclick="javascript:setBrushSize(1);">●Brush:1px</button>
-<button class="btn btn-primary" onclick="javascript:setBrushSize(10);">◉ Brush:10px</button>
+<button class="btn btn-primary" onclick="javascript:setBrushSize(1);">● Size:1px</button>
+<button class="btn btn-primary" onclick="javascript:setBrushSize(10);">◉ Size:10px</button>
+<br />
+<button class="btn btn-default" onclick="javascript:setBrush('stroke');">● Trace</button>
 <button class="btn btn-default" onclick="javascript:setBrush('fill');">▧ Fill</button>
+<button class="btn btn-default" onclick="javascript:setBrush('eraser');">ⓧ Erase</button>
 <!-- <button onclick="javascript:fullyShade();">Shade</button> -->
 <button class="btn btn-danger" onclick="javascript:;" id="undo">↺Undo</button>
 <br />
