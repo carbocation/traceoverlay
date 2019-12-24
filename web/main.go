@@ -32,6 +32,8 @@ func main() {
 		//syscall.SIGINFO,
 	)
 
+	log.Println(os.Args)
+
 	manifest := flag.String("manifest", "", "Tab-delimited manifest file which contains a zip_file and a dicom_file column (at least).")
 	project := flag.String("project", "", "Project name. Defines a folder into which all overlays will be written.")
 	port := flag.Int("port", 9019, "Port for HTTP server")
@@ -40,7 +42,7 @@ func main() {
 
 	if *manifest == "" || *project == "" {
 		flag.PrintDefaults()
-		return
+		os.Exit(1)
 	}
 
 	log.Printf("Creating directory ./%s/ if it does not yet exist\n", *project)
@@ -67,10 +69,7 @@ func main() {
 		manifest:     manifestLines,
 	}
 
-	// global.db.SetMaxOpenConns(*maxOpen)
-	// global.db.SetMaxIdleConns(*maxIdle)
-
-	global.log.Println("Launching TraceOverlay")
+	global.log.Println("Launching", global.Site)
 
 	go func() {
 		global.log.Println("Starting HTTP server on port", *port)
