@@ -242,6 +242,8 @@ function redrawAll() {
         context.stroke();
     }
 
+    fullyShade();
+
     // console.log("Finished re-drawing");
 }
 
