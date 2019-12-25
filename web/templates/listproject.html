@@ -18,7 +18,7 @@
 			<td><a href="/traceoverlay/{{$k}}">{{$v.Dicom}}</a></td>
 			<td><a href="/traceoverlay/{{$k}}">{{$v.Series}}</a></td>
 			<td><a href="/traceoverlay/{{$k}}">{{$v.InstanceNumber}}</a></td>
-			<td>{{if $v.HasOverlayFromProject}}✔️{{else}}{{end}}</td>
+			<td>{{if $v.HasOverlayFromProject}}✅{{else}}{{end}}</td>
 		</tr>
 	{{end}}
 </table>
