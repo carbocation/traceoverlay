@@ -138,17 +138,25 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 	}
 	manifestEntry := h.Global.Manifest()[manifestIndex]
 
+	nextManifestIndex := manifestIndex + 1
+	if len(h.Global.Manifest()) <= nextManifestIndex {
+		// Back to the start if you roll over
+		nextManifestIndex = 1
+	}
+
 	output := struct {
-		Project       string
-		ManifestIndex int
-		ManifestEntry Manifest
-		EncodedImage  string
-		Width         int
-		Height        int
+		Project           string
+		ManifestIndex     int
+		ManifestEntry     Manifest
+		EncodedImage      string
+		Width             int
+		Height            int
+		NextManifestIndex int
 	}{
-		Project:       h.Global.Project,
-		ManifestIndex: manifestIndex,
-		ManifestEntry: manifestEntry,
+		Project:           h.Global.Project,
+		ManifestIndex:     manifestIndex,
+		ManifestEntry:     manifestEntry,
+		NextManifestIndex: nextManifestIndex,
 	}
 
 	parsedImage := strings.SplitAfterN(r.PostFormValue("imgBase64"), ",", 2)
