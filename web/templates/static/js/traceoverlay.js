@@ -279,3 +279,18 @@ function undoLast() {
     points.pop();
     redrawAll();
 }
+
+// Switch with keys
+$(document).on("keypress", function(event){
+    event.preventDefault();
+    console.log(event); 
+    if(event.key == "e"){
+        setBrush('eraser');
+    } else if(event.key == "s"){
+        setBrush('stroke');
+    } else if(event.key == "f"){
+        setBrush('fill');
+    } else if(event.key == "t") {
+        saveCanvas();
+    }
+});
