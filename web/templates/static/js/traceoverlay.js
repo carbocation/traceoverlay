@@ -205,7 +205,7 @@ function fullyShade(shadeAlpha) {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     for (var i = 0; i < numPixels; i++) {
-        if (pixels[i*4+3] <= 1) {
+        if (pixels[i*4+3] <= 32) {
             pixels[i*4+3] = 0;
         } else {
             pixels[i*4+3] = shadeAlpha;
