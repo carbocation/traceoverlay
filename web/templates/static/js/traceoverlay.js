@@ -107,6 +107,8 @@ function start(e) {
         floodFill({r: 0x00, g: 0x00, b: 0xff, a: 0xff}, pos.x, pos.y);
         // floodFill(brushColor, pos.x, pos.y);
 
+        fullyShade(previewAlpha);
+
         mouseDown = false;
 
         return false

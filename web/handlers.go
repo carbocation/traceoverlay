@@ -74,18 +74,43 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var encodedOverlayString string
+	if manifestEntry.HasOverlayFromProject {
+		log.Println("HasOverlay")
+		switch {
+		default:
+			pngPath := filepath.Join(".", global.Project, manifestEntry.PNGFilename())
+			log.Println(pngPath)
+			f, err := os.Open(pngPath)
+			if err != nil {
+				break
+			}
+
+			img, err := png.Decode(f)
+			if err != nil {
+				break
+			}
+
+			var imBuff bytes.Buffer
+			png.Encode(&imBuff, img)
+			encodedOverlayString = base64.StdEncoding.EncodeToString(imBuff.Bytes())
+		}
+	}
+
 	// Convert that image to a PNG and base64 encode it so we can show it raw
 	var imBuff bytes.Buffer
 	png.Encode(&imBuff, im)
 	encodedString := base64.StdEncoding.EncodeToString(imBuff.Bytes())
 
 	output := struct {
-		Project       string
-		ManifestEntry Manifest
-		ManifestIndex int
-		EncodedImage  string
-		Width         int
-		Height        int
+		Project             string
+		ManifestEntry       Manifest
+		ManifestIndex       int
+		EncodedImage        string
+		Width               int
+		Height              int
+		HasOverlay          bool
+		EncodedOverlayImage string
 	}{
 		h.Global.Project,
 		manifestEntry,
@@ -93,6 +118,8 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		strings.NewReplacer("\n", "", "\r", "").Replace(encodedString),
 		im.Bounds().Dx(),
 		im.Bounds().Dy(),
+		manifestEntry.HasOverlayFromProject,
+		strings.NewReplacer("\n", "", "\r", "").Replace(encodedOverlayString),
 	}
 
 	Render(h, w, r, "Trace Overlay", "traceoverlay.html", output, nil)
@@ -141,7 +168,7 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save the BMP to disk under your project folder
-	f, err := os.Create(filepath.Join(".", global.Project, manifestEntry.Zip+"_"+manifestEntry.Dicom+".png"))
+	f, err := os.Create(filepath.Join(".", global.Project, manifestEntry.PNGFilename()))
 	if err != nil {
 		HTTPError(h, w, r, err)
 	}

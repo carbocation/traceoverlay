@@ -17,6 +17,10 @@ type Manifest struct {
 	HasOverlayFromProject bool
 }
 
+func (m Manifest) PNGFilename() string {
+	return m.Zip + "_" + m.Dicom + ".png"
+}
+
 // TODO: Pick a smarter algorithm here
 func UpdateManifest() error {
 	global.m.Lock()
