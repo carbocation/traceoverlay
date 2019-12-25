@@ -26,10 +26,10 @@
         y.height = {{$.Data.Height}};
         y.src = "data:image/png;base64,{{$.Data.EncodedOverlayImage}}";
 
-        console.log(y);
-
-        //var cssImage = CSSImageValue.parse("data:image/png;base64,{{$.Data.EncodedOverlayImage}}");
         context.drawImage(y, 0, 0);
+
+        // Make translucent, if configured
+        fullyShade(previewAlpha);
     }
     {{end}}
 </script>
@@ -38,6 +38,7 @@
 <span>Project: <a href="/listproject">{{$.Data.Project}}</a>. Zip: {{$.Data.ManifestEntry.Zip}}. Dicom: {{$.Data.ManifestEntry.Dicom}}</span>
 <br />
 <button class="btn btn-primary" onclick="javascript:setBrushSize(1);">● Size:1px</button>
+<button class="btn btn-primary" onclick="javascript:setBrushSize(2);">● Size:2px</button>
 <button class="btn btn-primary" onclick="javascript:setBrushSize(10);">◉ Size:10px</button>
 <br />
 <button class="btn btn-default" onclick="javascript:setBrush('stroke');">● Trace</button>
