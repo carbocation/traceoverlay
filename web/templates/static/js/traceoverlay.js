@@ -5,7 +5,7 @@ var canvas = document.getElementById("imgCanvas");
 var context = canvas.getContext("2d");
 context.globalAlpha = 1.0;
 context.imageSmoothingEnabled = false;
-context.fillStyle = "rgba(255, 0, 0, 1)";
+// context.fillStyle = "#ff0000"; //"rgba(255, 0, 0, 1)";
 // context.fillStyle = "#ff0000";
 // context.strokeStyle = "#ff0000";
 var previewAlpha = 196;
@@ -14,7 +14,7 @@ var saveAlpha = 255;
 // Brush variables
 var brush = "stroke";
 var brushSize = 3;
-var brushColor = "rgba(255, 0, 0, 1)"; //"#FF0000"; //{r:0xff, g:0x00, b:0x00, a:0xff}; //"#FF0000";
+var brushColor = "#ff0000"; //"rgba(255, 0, 0, 1)"; //"#FF0000"; //{r:0xff, g:0x00, b:0x00, a:0xff}; //"#FF0000";
 
 // Undo
 var lastX;
@@ -104,8 +104,8 @@ function start(e) {
         var rect = newLocal;
 
         // TODO: Figure out how to use the same color object for fill and draw
-        floodFill({r: 0x00, g: 0x00, b: 0xff, a: 0xff}, pos.x, pos.y);
-        // floodFill(brushColor, pos.x, pos.y);
+        // floodFill({r: 0x00, g: 0x00, b: 0xff, a: 0xff}, pos.x, pos.y);
+        floodFill(brushColor, pos.x, pos.y);
 
         fullyShade(previewAlpha);
 
@@ -237,7 +237,8 @@ function redrawAll() {
         } else if(pt.brush == "fill") {
             context.globalCompositeOperation="source-over";
             // TODO: Figure out how to use the same color object for fill and draw
-            floodFill({r: 0x00, g: 0xff, b: 0x00, a: 0xff}, pt.x, pt.y);
+            // floodFill({r: 0x00, g: 0xff, b: 0x00, a: 0xff}, pt.x, pt.y);
+            floodFill(brushColor, pt.x, pt.y);
             continue;
         } else {
             context.globalCompositeOperation="source-over";

@@ -1,5 +1,11 @@
 // Via https://codepen.io/Geeyoam/pen/vLGZzG
 function floodFill(newColor, x, y) {
+
+    // Permit #FFFFFF-style color definitions
+    if(newColor.search("#") >= 0) {
+        newColor = hexToRGBA(newColor)
+    }
+
     x = Math.floor(x)
     y = Math.floor(y)
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
@@ -92,4 +98,15 @@ function setColorAtPixel(imageData, color, x, y) {
 
 function colorMatch(a, b) {
     return a.r === b.r && a.g === b.g && a.b === b.b && a.a === b.a
+}
+
+function hexToRGBA(hexStr) {
+    let sanitized = hexStr.replace("#", "")
+
+    return {
+        r: parseInt(sanitized.substring(0,2), 16),
+        g: parseInt(sanitized.substring(2,4), 16),
+        b: parseInt(sanitized.substring(4,6), 16),
+        a: previewAlpha, // previewAlpha from traceoverlay.js
+    }
 }
