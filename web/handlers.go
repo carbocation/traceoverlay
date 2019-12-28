@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"image/color"
 	"image/png"
 	"log"
 	"net/http"
@@ -14,9 +15,9 @@ import (
 	"strconv"
 	"strings"
 
-	"golang.org/x/image/bmp"
-
 	"github.com/gorilla/mux"
+	"github.com/tj/go-rle"
+	"golang.org/x/image/bmp"
 )
 
 func (h *handler) TemplateOnly(w http.ResponseWriter, r *http.Request) {
@@ -177,15 +178,51 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// colors := make(map[color.Color]int)
-	// for x := 0; x < bmpImage.Bounds().Max.X; x++ {
-	// 	for y := 0; y < bmpImage.Bounds().Max.Y; y++ {
-	// 		c := bmpImage.At(x, y)
-	// 		colors[c]++
-	// 	}
-	// }
+	// Map from the color code to the Label, with all of its attached
+	// information
+	colorLabels := make(map[color.Color]Label)
+	pixelLabels := make([]int64, 0)
 
-	// fmt.Println(colors)
+	for x := 0; x < bmpImage.Bounds().Max.X; x++ {
+		for y := 0; y < bmpImage.Bounds().Max.Y; y++ {
+
+			// Find the color at this pixel
+			c := bmpImage.At(x, y)
+
+			// If we haven't yet mapped this point's color to a Label
+			// identifier, do so now:
+			if _, exists := colorLabels[c]; !exists {
+
+				// Create the hex string representation
+				r, g, b, _ := c.RGBA()
+				cl := fmt.Sprintf("#%02x%02x%02x", uint8(r), uint8(g), uint8(b))
+
+				// Look up the hex string representation and map it
+				for _, v := range h.Config.Labels.Sorted() {
+					if v.Color == cl {
+						colorLabels[c] = v
+						break
+					} else if cl == "#000000" && v.ID == 0 {
+						// Background, special case
+						colorLabels[c] = v
+						break
+					}
+				}
+			}
+
+			// Make sure that all labels are known
+			lab, exists := colorLabels[c]
+			if !exists {
+				HTTPError(h, w, r, fmt.Errorf("Saw color %v but could not find this color in the label map", c))
+				return
+			}
+			pixelLabels = append(pixelLabels, int64(lab.ID))
+		}
+	}
+
+	encoded := rle.EncodeInt64(pixelLabels)
+
+	fmt.Println(encoded)
 
 	// Save the BMP to disk under your project folder
 	f, err := os.Create(filepath.Join(".", global.Project, manifestEntry.PNGFilename()))
