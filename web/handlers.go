@@ -175,6 +175,16 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// colors := make(map[color.Color]int)
+	// for x := 0; x < bmpImage.Bounds().Max.X; x++ {
+	// 	for y := 0; y < bmpImage.Bounds().Max.Y; y++ {
+	// 		c := bmpImage.At(x, y)
+	// 		colors[c]++
+	// 	}
+	// }
+
+	// fmt.Println(colors)
+
 	// Save the BMP to disk under your project folder
 	f, err := os.Create(filepath.Join(".", global.Project, manifestEntry.PNGFilename()))
 	if err != nil {

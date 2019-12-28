@@ -34,11 +34,34 @@ func main() {
 
 	log.Println(os.Args)
 
+	jsonConfig := flag.String("config", "", "Path to JSON file with configuration. If this includes 'manifest' and 'project' keys, then those do not need to be set on the command line. If set on the command line, they will override the config file.")
 	manifest := flag.String("manifest", "", "Tab-delimited manifest file which contains a zip_file and a dicom_file column (at least).")
 	project := flag.String("project", "", "Project name. Defines a folder into which all overlays will be written.")
 	port := flag.Int("port", 9019, "Port for HTTP server")
 	//dbName := flag.String("db_name", "pubrank", "Name of the database schema to connect to")
 	flag.Parse()
+
+	if *jsonConfig != "" {
+		config, err := ParseJSONConfigFromPath(*jsonConfig)
+		if err == nil {
+			if *manifest == "" {
+				*manifest = config.ManifestPath
+			}
+			if *project == "" {
+				*project = config.Project
+			}
+			if *port == 0 {
+				*port = config.Port
+			}
+		}
+
+		if !config.Labels.Valid() {
+			config.Labels = make(LabelMap)
+		}
+
+		// spew.Dump(config)
+		log.Println(config.Labels.Sorted())
+	}
 
 	if *manifest == "" || *project == "" {
 		flag.PrintDefaults()
