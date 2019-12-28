@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"image/color"
 	"image/png"
 	"log"
 	"net/http"
@@ -16,7 +15,6 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/tj/go-rle"
 	"golang.org/x/image/bmp"
 )
 
@@ -178,52 +176,6 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Map from the color code to the Label, with all of its attached
-	// information
-	colorLabels := make(map[color.Color]Label)
-	pixelLabels := make([]int64, 0)
-
-	for x := 0; x < bmpImage.Bounds().Max.X; x++ {
-		for y := 0; y < bmpImage.Bounds().Max.Y; y++ {
-
-			// Find the color at this pixel
-			c := bmpImage.At(x, y)
-
-			// If we haven't yet mapped this point's color to a Label
-			// identifier, do so now:
-			if _, exists := colorLabels[c]; !exists {
-
-				// Create the hex string representation
-				r, g, b, _ := c.RGBA()
-				cl := fmt.Sprintf("#%02x%02x%02x", uint8(r), uint8(g), uint8(b))
-
-				// Look up the hex string representation and map it
-				for _, v := range h.Config.Labels.Sorted() {
-					if v.Color == cl {
-						colorLabels[c] = v
-						break
-					} else if cl == "#000000" && v.ID == 0 {
-						// Background, special case
-						colorLabels[c] = v
-						break
-					}
-				}
-			}
-
-			// Make sure that all labels are known
-			lab, exists := colorLabels[c]
-			if !exists {
-				HTTPError(h, w, r, fmt.Errorf("Saw color %v but could not find this color in the label map", c))
-				return
-			}
-			pixelLabels = append(pixelLabels, int64(lab.ID))
-		}
-	}
-
-	encoded := rle.EncodeInt64(pixelLabels)
-
-	fmt.Println(encoded)
-
 	// Save the BMP to disk under your project folder
 	f, err := os.Create(filepath.Join(".", global.Project, manifestEntry.PNGFilename()))
 	if err != nil {
@@ -241,12 +193,36 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert that image to a PNG and base64 encode it so we can show it raw
-	var imBuff bytes.Buffer
-	png.Encode(&imBuff, bmpImage)
-	encodedString := base64.StdEncoding.EncodeToString(imBuff.Bytes())
+	// Generate a runtime-length encoded version of the image
+	encoded, err := h.Config.Labels.EncodeImage(bmpImage)
+	if err != nil {
+		HTTPError(h, w, r, err)
+		return
+	}
 
-	output.EncodedImage = encodedString
+	//
+	fmt.Println(encoded)
+
+	// Decode the runtime-length encoding we just created
+	decoded, err := h.Config.Labels.DecodeImageFromRLE(encoded, bmpImage.Bounds().Max.X, bmpImage.Bounds().Max.Y)
+	if err != nil {
+		HTTPError(h, w, r, err)
+		return
+	}
+
+	// Convert our image mask to a PNG and base64 encode it so we can show it
+	// raw
+	var imBuff bytes.Buffer
+
+	// For now, instead of the submitted image, we will display (on the reponse
+	// page) the decoding of the RLE-encoded version of the mask as proof that
+	// we can encode/decode properly.
+	// png.Encode(&imBuff, bmpImage)
+	png.Encode(&imBuff, decoded)
+
+	base64Image := base64.StdEncoding.EncodeToString(imBuff.Bytes())
+
+	output.EncodedImage = base64Image
 	output.Width = bmpImage.Bounds().Dx()
 	output.Height = bmpImage.Bounds().Dy()
 
