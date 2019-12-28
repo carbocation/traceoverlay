@@ -41,8 +41,10 @@ func main() {
 	//dbName := flag.String("db_name", "pubrank", "Name of the database schema to connect to")
 	flag.Parse()
 
+	var config JSONConfig
+	var err error
 	if *jsonConfig != "" {
-		config, err := ParseJSONConfigFromPath(*jsonConfig)
+		config, err = ParseJSONConfigFromPath(*jsonConfig)
 		if err == nil {
 			if *manifest == "" {
 				*manifest = config.ManifestPath
@@ -90,6 +92,8 @@ func main() {
 		Project:      *project,
 		ManifestPath: *manifest,
 		manifest:     manifestLines,
+
+		Config: config,
 	}
 
 	global.log.Println("Launching", global.Site)

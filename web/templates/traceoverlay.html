@@ -16,8 +16,15 @@
     }
 </style>
 <script>
+    $(document).ready(function(){
+        setBrushColor({{(index $.Data.Labels 1).Color}})
+    })
+
     {{if $.Data.HasOverlay}}
     document.onreadystatechange = function() {
+        // TODO: Is this appropriate?
+        // document.onreadystatechange();
+
         var canvas = document.getElementById("imgCanvas");
         var context = canvas.getContext("2d");
 
@@ -47,6 +54,12 @@
 <button class="btn btn-default" onclick="javascript:setBrush('eraser');">ⓧ Erase</button>
 <!-- <button onclick="javascript:fullyShade();">Shade</button> -->
 <button class="btn btn-danger" onclick="javascript:;" id="undo">↺Undo</button>
+<br />
+<br />
+
+{{range $k, $v := $.Data.Labels}}
+    <button class="btn btn-primary {{if (eq 1 $k)}}default-color{{end}}" style="background-color:{{$v.Color}};" onclick="javascript:setBrushColor('{{$v.Color}}');">{{$v.Label}}</button>
+{{end}}
 <br />
 <br />
 <form method="POST" id="saveImage" action="/traceoverlay/{{$.Data.ManifestIndex}}">

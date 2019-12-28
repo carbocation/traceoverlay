@@ -31,6 +31,16 @@ function getMousePos(canvas, evt) {
     };
 }
 
+function setBrushColor(color) {
+    if(color == "") {
+        setBrush("eraser");
+        return
+    }
+
+    brushColor = color;
+    setBrush("stroke");
+}
+
 function setBrushSize(size) {
     if(brush == "fill") {
         brush = "stroke";

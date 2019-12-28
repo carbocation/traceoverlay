@@ -20,6 +20,8 @@ type Global struct {
 
 	m        sync.RWMutex
 	manifest []Manifest
+
+	Config JSONConfig
 }
 
 func (g Global) Manifest() []Manifest {
