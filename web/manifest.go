@@ -17,8 +17,12 @@ type Manifest struct {
 	HasOverlayFromProject bool
 }
 
-func (m Manifest) PNGFilename() string {
-	return m.Zip + "_" + m.Dicom + ".png"
+func (m Manifest) OverlayFilename() string {
+	return overlayFilename(m.Dicom)
+}
+
+func overlayFilename(dicom string) string {
+	return dicom + ".png.mask.png"
 }
 
 // TODO: Pick a smarter algorithm here
@@ -27,7 +31,6 @@ func UpdateManifest() error {
 	defer global.m.Unlock()
 
 	// First, look in the project directory to get updates to annotations.
-	suffix := ".png"
 	files, err := ioutil.ReadDir(filepath.Join(".", global.Project))
 	if os.IsNotExist(err) {
 		// Not a problem
@@ -46,7 +49,7 @@ func UpdateManifest() error {
 
 	// Toggle to the latest knowledge about the manifest
 	for i, v := range updatedManifest {
-		_, hasOverlay := overlaysExist[v.Zip+"_"+v.Dicom+suffix]
+		_, hasOverlay := overlaysExist[overlayFilename(v.Dicom)]
 		updatedManifest[i].HasOverlayFromProject = hasOverlay
 	}
 
@@ -56,7 +59,6 @@ func UpdateManifest() error {
 // ReadManifest takes the path to a manifest file and extracts each line.
 func ReadManifest(manifestPath, projectPath string) ([]Manifest, error) {
 	// First, look in the project directory to see if there is any annotation.
-	suffix := ".png"
 	files, err := ioutil.ReadDir(filepath.Join(".", projectPath))
 	if os.IsNotExist(err) {
 		// Not a problem
@@ -114,7 +116,7 @@ func ReadManifest(manifestPath, projectPath string) ([]Manifest, error) {
 			intInstance = 0
 		}
 
-		_, hasOverlay := overlaysExist[cols[header.Zip]+"_"+cols[header.Dicom]+suffix]
+		_, hasOverlay := overlaysExist[overlayFilename(cols[header.Dicom])]
 
 		output = append(output, Manifest{
 			Zip:                   cols[header.Zip],

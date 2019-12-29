@@ -78,7 +78,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		log.Println("HasOverlay")
 		switch {
 		default:
-			pngPath := filepath.Join(".", global.Project, manifestEntry.PNGFilename())
+			pngPath := filepath.Join(".", global.Project, manifestEntry.OverlayFilename())
 			log.Println(pngPath)
 			f, err := os.Open(pngPath)
 			if err != nil {
@@ -193,7 +193,7 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save the BMP to disk under your project folder, using the ID-encoding.
-	f, err := os.Create(filepath.Join(".", global.Project, manifestEntry.PNGFilename()))
+	f, err := os.Create(filepath.Join(".", global.Project, manifestEntry.OverlayFilename()))
 	if err != nil {
 		HTTPError(h, w, r, err)
 	}
