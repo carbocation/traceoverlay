@@ -33,7 +33,9 @@ function getMousePos(canvas, evt) {
 
 function setBrushColor(color) {
     if(color == "") {
-        setBrush("eraser");
+        setBrush("stroke");
+        brushColor = "rgba(0, 0, 0, 1)";
+        // setBrush("eraser");
         return
     }
 

@@ -90,8 +90,16 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 
+			// Decode into something visually acceptable
+			humanImg, err := h.Config.Labels.DecodeImageFromImageSegment(img)
+			if err != nil {
+				HTTPError(h, w, r, err)
+				return
+			}
+
 			var imBuff bytes.Buffer
-			png.Encode(&imBuff, img)
+			png.Encode(&imBuff, humanImg)
+			// png.Encode(&imBuff, img)
 			encodedOverlayString = base64.StdEncoding.EncodeToString(imBuff.Bytes())
 		}
 	}
