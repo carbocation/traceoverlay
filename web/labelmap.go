@@ -19,7 +19,7 @@ type Label struct {
 
 type LabelMap map[string]Label
 
-func (l LabelMap) EncodeImage(bmpImage image.Image) ([]byte, error) {
+func (l LabelMap) EncodeImageToRLE(bmpImage image.Image) ([]byte, error) {
 	// Map from the color code to the Label, with all of its attached
 	// information
 	colorLabels := make(map[color.Color]Label)

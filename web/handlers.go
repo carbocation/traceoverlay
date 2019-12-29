@@ -194,7 +194,7 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate a runtime-length encoded version of the image
-	encoded, err := h.Config.Labels.EncodeImage(bmpImage)
+	encoded, err := h.Config.Labels.EncodeImageToRLE(bmpImage)
 	if err != nil {
 		HTTPError(h, w, r, err)
 		return
