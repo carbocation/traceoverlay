@@ -154,10 +154,7 @@ func (l LabelMap) DecodeImageFromImageSegment(bmpImage image.Image) (image.Image
 				return nil, err
 			}
 
-			hr, hg, hb, ha := humanColor.RGBA()
-			if hr != 0 {
-				fmt.Println(hr, hg, hb, ha)
-			}
+			hr, hg, hb, _ := humanColor.RGBA()
 
 			outputImage.Set(x, y, color.RGBA{
 				R: uint8(hr),
