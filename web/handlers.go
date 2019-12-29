@@ -176,42 +176,37 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Save the BMP to disk under your project folder
+	// Generate an encoded version of the image that uses #000000 for
+	// background, #010101 for ID 1, etc
+	encoded, err := h.Config.Labels.EncodeImageToImageSegment(bmpImage)
+	if err != nil {
+		HTTPError(h, w, r, err)
+		return
+	}
+
+	// Save the BMP to disk under your project folder, using the ID-encoding.
 	f, err := os.Create(filepath.Join(".", global.Project, manifestEntry.PNGFilename()))
 	if err != nil {
 		HTTPError(h, w, r, err)
 	}
 	defer f.Close()
 
-	// BMP encoding yields all black files for some reason?
-	// if err := bmp.Encode(f, bmpImage); err != nil {
-	// 	HTTPError(h, w, r, err)
-	// 	return
-	// }
-	if err := png.Encode(f, bmpImage); err != nil {
+	// Write the PNG representation of our ID-encoded image to disk
+	if err := png.Encode(f, encoded); err != nil {
 		HTTPError(h, w, r, err)
 		return
 	}
 
-	// Generate a runtime-length encoded version of the image
-	encoded, err := h.Config.Labels.EncodeImageToRLE(bmpImage)
+	// Decode the ID-encoding we just created into a human-interpretable set of
+	// colors.
+	decoded, err := h.Config.Labels.DecodeImageFromImageSegment(encoded)
 	if err != nil {
 		HTTPError(h, w, r, err)
 		return
 	}
 
-	//
-	fmt.Println(encoded)
-
-	// Decode the runtime-length encoding we just created
-	decoded, err := h.Config.Labels.DecodeImageFromRLE(encoded, bmpImage.Bounds().Max.X, bmpImage.Bounds().Max.Y)
-	if err != nil {
-		HTTPError(h, w, r, err)
-		return
-	}
-
-	// Convert our image mask to a PNG and base64 encode it so we can show it
-	// raw
+	// Convert our (decoded, human-readable) image mask to a PNG and base64
+	// encode it so we can show it raw
 	var imBuff bytes.Buffer
 
 	// For now, instead of the submitted image, we will display (on the reponse
