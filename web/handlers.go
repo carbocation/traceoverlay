@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"image"
 	"image/png"
 	"log"
 	"net/http"
@@ -65,20 +66,27 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 	}
 
 	manifestEntry := h.Global.Manifest()[manifestIndex]
+	var im image.Image
 
-	pathPart := path.Dir(h.Global.ManifestPath)
-	im, err := ExtractDicomFromLocalFile(fmt.Sprintf("%s/%s", pathPart, manifestEntry.Zip), manifestEntry.Dicom, true)
+	if h.Global.Config.PreParsed {
+		im, err = ExtractImageFromLocalFile(manifestEntry.Dicom, h.Global.Config.ImageSuffix, h.Global.Config.ImagePath)
+	} else {
+		pathPart := path.Dir(h.Global.ManifestPath)
+		im, err = ExtractDicomFromLocalFile(fmt.Sprintf("%s/%s", pathPart, manifestEntry.Zip), manifestEntry.Dicom, true)
+	}
 	if err != nil {
 		HTTPError(h, w, r, err)
 		return
 	}
+
+	log.Println(manifestEntry.OverlayFilename())
 
 	var encodedOverlayString string
 	if manifestEntry.HasOverlayFromProject {
 		log.Println("HasOverlay")
 		switch {
 		default:
-			pngPath := filepath.Join(".", global.Project, manifestEntry.OverlayFilename())
+			pngPath := filepath.Join(global.Project, manifestEntry.OverlayFilename())
 			log.Println(pngPath)
 			f, err := os.Open(pngPath)
 			if err != nil {
@@ -193,7 +201,7 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save the BMP to disk under your project folder, using the ID-encoding.
-	f, err := os.Create(filepath.Join(".", global.Project, manifestEntry.OverlayFilename()))
+	f, err := os.Create(filepath.Join(global.Project, manifestEntry.OverlayFilename()))
 	if err != nil {
 		HTTPError(h, w, r, err)
 	}

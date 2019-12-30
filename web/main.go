@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -10,8 +11,11 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"syscall"
 	"time"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 var global *Global
@@ -19,6 +23,17 @@ var global *Global
 func init() {
 	// Prevent seed re-use
 	rand.Seed(int64(time.Now().Nanosecond()))
+
+	flag.Usage = func() {
+		flag.PrintDefaults()
+
+		log.Println("Optional config file layout:")
+		// json.NewEncoder(os.Stderr).Encode()
+		bts, err := json.MarshalIndent(JSONConfig{Labels: LabelMap{"Background": Label{Color: "", ID: 0}}}, "", "  ")
+		if err == nil {
+			log.Println(string(bts))
+		}
+	}
 }
 
 func main() {
@@ -32,6 +47,7 @@ func main() {
 		//syscall.SIGINFO,
 	)
 
+	log.Println("Launched with arguments:")
 	log.Println(os.Args)
 
 	jsonConfig := flag.String("config", "", "Path to JSON file with configuration. If this includes 'manifest' and 'project' keys, then those do not need to be set on the command line. If set on the command line, they will override the config file.")
@@ -61,19 +77,26 @@ func main() {
 			config.Labels = make(LabelMap)
 		}
 
-		// spew.Dump(config)
-		log.Println(config.Labels.Sorted())
+		log.Printf("Using configuration:\n%s\n", spew.Sdump(config))
+
+		log.Printf("Labels in effect:\n%v\n", config.Labels.Sorted())
 	}
 
 	if *manifest == "" || *project == "" {
-		flag.PrintDefaults()
+		flag.Usage()
 		os.Exit(1)
 	}
 
-	log.Printf("Creating directory ./%s/ if it does not yet exist\n", *project)
-	newpath := filepath.Join(".", *project)
-	if err := os.MkdirAll(newpath, os.ModePerm); err != nil {
-		log.Fatalln(err)
+	// If the project isn't a fully path that will store the annotations
+	// (inferred by the presence of a path delimiter), assume it's a
+	// subdirectory and create it if it does not exist:
+	newpath := *project
+	if !strings.Contains(*project, "/") {
+		log.Printf("Creating directory ./%s/ if it does not yet exist\n", *project)
+		newpath = filepath.Join(".", *project)
+		if err := os.MkdirAll(newpath, os.ModePerm); err != nil {
+			log.Fatalln(err)
+		}
 	}
 
 	manifestLines, err := ReadManifest(*manifest, *project)
@@ -89,7 +112,7 @@ func main() {
 		log:       log.New(os.Stderr, log.Prefix(), log.Ldate|log.Ltime),
 		db:        nil,
 
-		Project:      *project,
+		Project:      newpath,
 		ManifestPath: *manifest,
 		manifest:     manifestLines,
 
