@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/carbocation/genomisc/overlay"
 	"github.com/gorilla/mux"
 	"golang.org/x/image/bmp"
 )
@@ -122,7 +123,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		Height              int
 		HasOverlay          bool
 		EncodedOverlayImage string
-		Labels              []Label
+		Labels              []overlay.Label
 	}{
 		h.Global.Project,
 		manifestEntry,

@@ -3,6 +3,7 @@ package main
 import (
 	"sync"
 
+	"github.com/carbocation/genomisc/overlay"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -21,7 +22,7 @@ type Global struct {
 	m        sync.RWMutex
 	manifest []Manifest
 
-	Config JSONConfig
+	Config overlay.JSONConfig
 }
 
 func (g Global) Manifest() []Manifest {

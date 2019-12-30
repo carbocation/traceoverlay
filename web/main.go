@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/carbocation/genomisc/overlay"
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -29,7 +30,7 @@ func init() {
 
 		log.Println("Optional config file layout:")
 		// json.NewEncoder(os.Stderr).Encode()
-		bts, err := json.MarshalIndent(JSONConfig{Labels: LabelMap{"Background": Label{Color: "", ID: 0}}}, "", "  ")
+		bts, err := json.MarshalIndent(overlay.JSONConfig{Labels: overlay.LabelMap{"Background": overlay.Label{Color: "", ID: 0}}}, "", "  ")
 		if err == nil {
 			log.Println(string(bts))
 		}
@@ -57,10 +58,10 @@ func main() {
 	//dbName := flag.String("db_name", "pubrank", "Name of the database schema to connect to")
 	flag.Parse()
 
-	var config JSONConfig
+	var config overlay.JSONConfig
 	var err error
 	if *jsonConfig != "" {
-		config, err = ParseJSONConfigFromPath(*jsonConfig)
+		config, err = overlay.ParseJSONConfigFromPath(*jsonConfig)
 		if err == nil {
 			if *manifest == "" {
 				*manifest = config.ManifestPath
@@ -74,7 +75,7 @@ func main() {
 		}
 
 		if !config.Labels.Valid() {
-			config.Labels = make(LabelMap)
+			config.Labels = make(overlay.LabelMap)
 		}
 
 		log.Printf("Using configuration:\n%s\n", spew.Sdump(config))
@@ -106,9 +107,9 @@ func main() {
 
 	global = &Global{
 		Site:      "TraceOverlay",
-		Company:   "Broad Institute",
-		Email:     "jamesp@broadinstitute.org",
-		SnailMail: "415 Main Street, Cambridge MA",
+		Company:   "Carbocation Corporation",
+		Email:     "james@carbocation.com",
+		SnailMail: "4 Longfellow Pl Apt 2901, Boston MA 02114",
 		log:       log.New(os.Stderr, log.Prefix(), log.Ldate|log.Ltime),
 		db:        nil,
 
