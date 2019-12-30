@@ -79,15 +79,11 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(manifestEntry.OverlayFilename())
-
 	var encodedOverlayString string
 	if manifestEntry.HasOverlayFromProject {
-		log.Println("HasOverlay")
 		switch {
 		default:
 			pngPath := filepath.Join(global.Project, manifestEntry.OverlayFilename())
-			log.Println(pngPath)
 			f, err := os.Open(pngPath)
 			if err != nil {
 				break

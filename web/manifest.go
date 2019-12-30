@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/csv"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -61,7 +60,6 @@ func UpdateManifest() error {
 func ReadManifest(manifestPath, projectPath string) ([]Manifest, error) {
 	// First, look in the project directory to see if there is any annotation.
 	files, err := ioutil.ReadDir(filepath.Join(projectPath))
-	log.Println(filepath.Join(projectPath))
 	if os.IsNotExist(err) {
 		// Not a problem
 	} else if err != nil {
