@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 type Manifest struct {
@@ -22,6 +23,10 @@ func (m Manifest) OverlayFilename() string {
 }
 
 func overlayFilename(dicom string) string {
+	if strings.HasSuffix(dicom, ".png") {
+		return dicom + ".mask.png"
+	}
+
 	return dicom + ".png.mask.png"
 }
 
