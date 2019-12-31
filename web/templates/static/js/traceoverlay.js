@@ -231,6 +231,9 @@ function fullyShade(shadeAlpha) {
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
+    // First, remove colors that are not among our color coding scheme:
+    removeIllegalColors(allowedColors);
+
     for (var i = 0; i < numPixels; i++) {
         if (pixels[i*4+3] <= 32) {
             pixels[i*4+3] = 0;
@@ -327,3 +330,23 @@ $(document).on("keypress", function(event){
         saveCanvas();
     }
 });
+
+function removeIllegalColors(allowedColors) {
+    var imageData = context.getImageData(0,0,canvas.width, canvas.height);
+    var pixels = imageData.data;
+    var numPixels = pixels.length;
+
+    for (var i = 0; i < numPixels; i++) {
+        var red = pixels[i];
+        var green = pixels[i+1];
+        var blue = pixels[i+2];
+        var alpha = pixels[i+3];
+
+        // var hex = "#" + ("000000" + rgbToHex(p[0], p[1], p[2])).slice(-6);
+        var hex = "#" + rgbToHex(red, green, blue);
+        if(!allowedColors.has(hex) && (hex != "#000000") && (hex != "#0")) {
+            console.log("Illegal:" + hex);
+        }
+    }
+    context.putImageData(imageData, 0, 0);
+}

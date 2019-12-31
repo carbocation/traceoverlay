@@ -41,6 +41,15 @@
         fullyShade(previewAlpha);
     }
     {{end}}
+
+    // Ensure that colors are permissible
+    var allowedColors = new Map();
+    {{range $k, $v := $.Data.Labels}}
+        {{if (ne $v.Color "")}}
+            allowedColors.set({{$v.Color}}, 1);
+        {{end}}
+    {{end}}
+    console.log(allowedColors);
 </script>
 {{end}}
 {{define "page"}}
@@ -91,4 +100,5 @@ height="85"></canvas> -->
 <script src="{{.Assets}}/js/traceoverlay.js"></script>
 <script src="{{.Assets}}/js/bmp.js"></script>
 <script src="{{.Assets}}/js/fill.js"></script>
+<script src="{{.Assets}}/js/misc.js"></script>
 {{end}}
