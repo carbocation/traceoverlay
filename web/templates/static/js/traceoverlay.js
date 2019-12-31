@@ -81,6 +81,8 @@ function stop(e) {
     if(brush == "line") {
         // If drawing a straight line segment, we aren't drawing along the way,
         // so we need to commit our stroke here:
+        context.fillStyle = brushColor;
+        context.strokeStyle = brushColor;
         context.lineTo(pos.x, pos.y);
         context.stroke();
     }
