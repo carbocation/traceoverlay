@@ -16,6 +16,13 @@
     }
 </style>
 <script>
+
+    {{/* Pre-existing annotation*/}}
+    var preExistingImage = document.createElement("img");
+    preExistingImage.width = {{$.Data.Width}};
+    preExistingImage.height = {{$.Data.Height}};
+    preExistingImage.src = "data:image/png;base64,{{$.Data.EncodedOverlayImage}}";
+    
     $(document).ready(function(){
         setBrushColor({{(index $.Data.Labels 1).Color}})
     })
@@ -28,12 +35,7 @@
         var canvas = document.getElementById("imgCanvas");
         var context = canvas.getContext("2d");
 
-        var y = document.createElement("img");
-        y.width = {{$.Data.Width}};
-        y.height = {{$.Data.Height}};
-        y.src = "data:image/png;base64,{{$.Data.EncodedOverlayImage}}";
-
-        context.drawImage(y, 0, 0);
+        context.drawImage(preExistingImage, 0, 0);
 
         // Make translucent, if configured
         fullyShade(previewAlpha);

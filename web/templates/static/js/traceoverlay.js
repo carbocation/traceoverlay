@@ -232,25 +232,30 @@ function redrawAll() {
     // console.log(points[0]);
     // console.log(points[1]);
 
+    // Clear the contents of the canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Add back the original image, if it exists:
+    context.globalCompositeOperation="source-over";
+    context.drawImage(preExistingImage, 0, 0);
+
+    // If no points have been created yet, we're done:
     if (points.length == 0) {
         return;
     }
 
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    // console.log(context);
+    // console.log(points);
 
     for (var i = 0; i < points.length; i++) {
 
         var pt = points[i];
+        // console.log(pt.color);
 
         if(pt.brush == "eraser") {
             context.globalCompositeOperation="destination-out";
         } else if(pt.brush == "fill") {
             context.globalCompositeOperation="source-over";
-            // TODO: Figure out how to use the same color object for fill and draw
-            // floodFill({r: 0x00, g: 0xff, b: 0x00, a: 0xff}, pt.x, pt.y);
-            floodFill(brushColor, pt.x, pt.y);
+            floodFill(pt.color, pt.x, pt.y);
             continue;
         } else {
             context.globalCompositeOperation="source-over";
