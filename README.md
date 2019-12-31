@@ -1,6 +1,6 @@
 # TraceOverlay
 
-`go get github.com/broadinstitute/ml4cvd/jamesp/traceoverlay/web`
+`go get github.com/carbocation/traceoverlay/web`
 
 ## Running:
 1. Build
