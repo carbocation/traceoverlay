@@ -80,6 +80,12 @@ func main() {
 			config.Labels = make(overlay.LabelMap)
 		}
 
+		for _, label := range config.Labels {
+			if label.Color == "#000000" && label.ID != 0 {
+				log.Fatalf("Configuration problem: label %+v has color #000000, which is reserved for the background (label ID 0).\n", label)
+			}
+		}
+
 		log.Printf("Using configuration:\n%s\n", spew.Sdump(config))
 
 		log.Printf("Labels in effect:\n%v\n", config.Labels.Sorted())
