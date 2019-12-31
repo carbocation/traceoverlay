@@ -75,9 +75,17 @@ function stop(e) {
     if(!mouseDown) {
         return
     }
-    fullyShade(previewAlpha);
 
     var pos = getMousePos(canvas, e);
+
+    if(brush == "line") {
+        // If drawing a straight line segment, we aren't drawing along the way,
+        // so we need to commit our stroke here:
+        context.lineTo(pos.x, pos.y);
+        context.stroke();
+    }
+
+    fullyShade(previewAlpha);
 
     points.push({
         x: pos.x,
@@ -141,6 +149,11 @@ function start(e) {
 // Continue drawing a line segment
 function draw(e) {
     if(!mouseDown) {
+        return
+    }
+
+    if(brush == "line") {
+        // Don't keep the mouse down for a straight line segment
         return
     }
 
