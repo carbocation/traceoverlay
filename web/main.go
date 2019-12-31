@@ -72,6 +72,8 @@ func main() {
 			if *port == 0 {
 				*port = config.Port
 			}
+		} else {
+			log.Fatalln(err)
 		}
 
 		if !config.Labels.Valid() {
