@@ -44,8 +44,12 @@
     {{end}}
 </script>
 {{end}}
+
+{{define "bodyinsert"}}
+<div class="notif-div" id="drawmessage">Hello</div>
+{{end}}
+
 {{define "page"}}
-<div class="notif-div btn btn-primary" id="drawmessage">Hello</div>
 <span>Project: <a href="/listproject">{{$.Data.Project}}</a>. Zip: {{$.Data.ManifestEntry.Zip}}. Dicom: {{$.Data.ManifestEntry.Dicom}}</span>
 <br />
 <button class="btn btn-primary" onclick="javascript:setBrushSize(1);">● Size:1px</button>

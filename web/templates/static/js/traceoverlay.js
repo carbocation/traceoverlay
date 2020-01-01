@@ -421,6 +421,7 @@ function flashMessage(message) {
     // Fetch the message box and make it visible
     var target = document.getElementById("drawmessage");
     target.style.visibility = "visible";
+    target.style.border = "4px solid " + brushColor;
 
     // Update its contents
     target.textContent = message;
@@ -428,7 +429,7 @@ function flashMessage(message) {
     // Set a timeout again
     flashTimeout = setTimeout(function(){
         target.style.visibility = "hidden";
-    }, 1000);
+    }, 350);
 }
 
 function nextBrush() {
