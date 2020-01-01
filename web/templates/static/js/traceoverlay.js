@@ -48,6 +48,10 @@ function setBrushSize(size) {
         brush = "stroke";
     }
 
+    if(size < 1) {
+        size = 1;
+    }
+
     brushSize = size;
 }
 
@@ -359,7 +363,7 @@ function undoLast() {
 // Switch with keys
 $(document).on("keypress", function(event){
     event.preventDefault();
-    console.log(event); 
+    // console.log(event); 
     if(event.key == "e"){
         setBrush('eraser');
     } else if(event.key == "s"){
@@ -370,5 +374,9 @@ $(document).on("keypress", function(event){
         setBrush('line');
     } else if(event.key == "n") {
         saveCanvas();
+    } else if(event.key == "z") {
+        setBrushSize(brushSize - 1);
+    } else if(event.key == "x") {
+        setBrushSize(brushSize + 1);
     }
 });
