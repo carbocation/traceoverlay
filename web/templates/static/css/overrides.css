@@ -5,3 +5,16 @@
 .jumbotron.home input {
 	color: #000;
 }
+
+.notif-div{
+    width:200px;
+    height:40px;
+    position:fixed;
+    top:0;
+    left:50%;
+    margin-left:-100px;
+    /* margin-top:-270px; */
+    z-index:60;
+	/* display:none; */
+	visibility: hidden;
+}

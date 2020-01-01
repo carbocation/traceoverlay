@@ -366,17 +366,42 @@ $(document).on("keypress", function(event){
     // console.log(event); 
     if(event.key == "e"){
         setBrush('eraser');
+        flashMessage("Eraser mode");
     } else if(event.key == "s"){
         setBrush('stroke');
+        flashMessage("Brush: " + brush);
     } else if(event.key == "f"){
         setBrush('fill');
+        flashMessage("Brush: " + brush);
     } else if(event.key == "l") {
         setBrush('line');
+        flashMessage("Brush: " + brush);
     } else if(event.key == "n") {
         saveCanvas();
     } else if(event.key == "z") {
         setBrushSize(brushSize - 1);
+        flashMessage("Brush size now " + brushSize);
     } else if(event.key == "x") {
         setBrushSize(brushSize + 1);
+        flashMessage("Brush size now " + brushSize);
     }
 });
+
+var flashTimeout;
+function flashMessage(message) {
+    // If the timeout is already set for a prior message, block that from
+    // prematurely hiding the new one
+    clearTimeout(flashTimeout);
+
+    // Fetch the message box and make it visible
+    var target = document.getElementById("drawmessage");
+    target.style.visibility = "visible";
+
+    // Update its contents
+    target.textContent = message;
+
+    // Set a timeout again
+    flashTimeout = setTimeout(function(){
+        target.style.visibility = "hidden";
+    }, 1000);
+}
