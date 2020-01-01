@@ -390,8 +390,27 @@ $(document).on("keypress", function(event){
     } else if(event.key == "w") {
         newBrushName = nextBrush();
         flashMessage("Brush: " + newBrushName);
+    } else if(event.key == "h") {
+        msg = toggleVisibility();
+        flashMessage(msg + " canvas");
     }
 });
+
+var canvasVisibility = "visible";
+function toggleVisibility() {
+    if(canvasVisibility == "hidden"){
+        canvasVisibility = "visible";
+        redrawAll();
+        fullyShade(previewAlpha);
+
+        return "Revealing"
+    } else {
+        canvasVisibility = "hidden";
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        return "Hiding"
+    }
+}
 
 var flashTimeout;
 function flashMessage(message) {
