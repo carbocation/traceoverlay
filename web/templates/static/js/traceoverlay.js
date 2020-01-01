@@ -185,11 +185,43 @@ canvas.addEventListener('mouseout', stop, false);
 canvas.addEventListener('mouseup', stop, false);
 canvas.addEventListener('mousedown', start, false);
 
-// Support touch devices
-canvas.addEventListener('touchmove', draw, false);
-canvas.addEventListener('touchcancel', stop, false);
-canvas.addEventListener('touchend', stop, false);
-canvas.addEventListener('touchstart', start, false);
+// Support touch devices. Actually, since I'm referring to mouse events
+// throughout the functions in this script, it is probably easiest to creat a
+// mouse event from each touch event. See
+// http://bencentra.com/code/2014/12/05/html5-canvas-touch-events.html
+function getTouchPos(canvasDom, touchEvent) {
+    var rect = canvasDom.getBoundingClientRect();
+    return {
+        x: touchEvent.touches[0].clientX - rect.left,
+        y: touchEvent.touches[0].clientY - rect.top
+    };
+}
+canvas.addEventListener('touchmove', function (e) {
+    var touch = e.touches[0];
+    var mouseEvent = new MouseEvent("mousemove", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    canvas.dispatchEvent(mouseEvent);
+}, false);
+canvas.addEventListener('touchcancel', function (e) {
+    var mouseEvent = new MouseEvent("mouseup", {});
+    canvas.dispatchEvent(mouseEvent);
+}, false);
+canvas.addEventListener('touchend', function (e) {
+    var mouseEvent = new MouseEvent("mouseup", {});
+    canvas.dispatchEvent(mouseEvent);
+}, false);
+canvas.addEventListener('touchstart', function (e) {
+    mousePos = getTouchPos(canvas, e);
+    var touch = e.touches[0];
+    var mouseEvent = new MouseEvent("mousedown", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    canvas.dispatchEvent(mouseEvent);
+}, false);
+
 
 function saveCanvas() {
     // context.globalAlpha = 1.0;
@@ -334,9 +366,9 @@ $(document).on("keypress", function(event){
         setBrush('stroke');
     } else if(event.key == "f"){
         setBrush('fill');
-    } else if(event.key == "t") {
+    } else if(event.key == "l") {
         setBrush('line');
-    } else if(event.key == "t") {
+    } else if(event.key == "n") {
         saveCanvas();
     }
 });
