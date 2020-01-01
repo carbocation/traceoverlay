@@ -33,9 +33,9 @@ function getMousePos(canvas, evt) {
 
 function setBrushColor(color) {
     if(color == "") {
-        setBrush("stroke");
+
         brushColor = "rgba(0, 0, 0, 1)";
-        // setBrush("eraser");
+        setBrush("eraser");
         return
     }
 
@@ -384,6 +384,12 @@ $(document).on("keypress", function(event){
     } else if(event.key == "x") {
         setBrushSize(brushSize + 1);
         flashMessage("Brush size now " + brushSize);
+    } else if(event.key == "q") {
+        newBrushName = prevBrush();
+        flashMessage("Brush: " + newBrushName);
+    } else if(event.key == "w") {
+        newBrushName = nextBrush();
+        flashMessage("Brush: " + newBrushName);
     }
 });
 
@@ -404,4 +410,56 @@ function flashMessage(message) {
     flashTimeout = setTimeout(function(){
         target.style.visibility = "hidden";
     }, 1000);
+}
+
+function nextBrush() {
+    return changeBrush("next");
+}
+
+function prevBrush() {
+    return changeBrush("prev");
+}
+
+function changeBrush(dir) {    
+    var labels = document.getElementById("labels");
+    if(labels.childElementCount < 1){
+        return ""
+    }
+
+    var activeIndex = 0
+    Array.from(labels.children).forEach(function(item, i, array){
+        bgCol = window.getComputedStyle(item, null).getPropertyValue('background-color');
+
+        if(rgb2hex(bgCol) == brushColor){
+            activeIndex = i;
+        }
+    })
+
+    if(dir == "prev"){
+        desiredIndex = activeIndex - 1;
+    } else {
+        desiredIndex = activeIndex + 1;
+    }
+
+    if( desiredIndex > Array.from(labels.children).length - 1) {
+        desiredIndex = Array.from(labels.children).length - 1;
+    } else if( desiredIndex < 0) {
+        desiredIndex = 0;
+    }
+
+    // This is the label we want
+    elem = Array.from(labels.children)[desiredIndex];
+
+    // Special case: exit early if it's the background color
+    // console.log("'" + elem.style.backgroundColor + "'");
+    if(elem.style.backgroundColor == ""){
+        // console.log("Setting to blank?")
+        setBrushColor("");
+        return elem.textContent;
+    }
+
+    // General case: get the computed background color and use that.
+    setBrushColor(rgb2hex(window.getComputedStyle(elem, null).getPropertyValue('background-color')));
+
+    return elem.textContent;
 }

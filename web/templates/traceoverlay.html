@@ -61,10 +61,11 @@
 <button class="btn btn-danger" onclick="javascript:;" ontouch="javascript:;" id="undo">↺Undo</button>
 <br />
 <br />
-
+<span id="labels">
 {{range $k, $v := $.Data.Labels}}
     <button class="btn btn-primary {{if (eq 1 $k)}}default-color{{end}}" style="background-color:{{$v.Color}};" onclick="javascript:setBrushColor('{{$v.Color}}');">{{$v.Label}}</button>
 {{end}}
+</span>
 <br />
 <br />
 <form method="POST" id="saveImage" action="/traceoverlay/{{$.Data.ManifestIndex}}">
