@@ -185,6 +185,12 @@ canvas.addEventListener('mouseout', stop, false);
 canvas.addEventListener('mouseup', stop, false);
 canvas.addEventListener('mousedown', start, false);
 
+// Support touch devices
+canvas.addEventListener('touchmove', draw, false);
+canvas.addEventListener('touchcancel', stop, false);
+canvas.addEventListener('touchend', stop, false);
+canvas.addEventListener('touchstart', start, false);
+
 function saveCanvas() {
     // context.globalAlpha = 1.0;
     fullyShade(saveAlpha);
@@ -299,6 +305,11 @@ document.getElementById("undo").addEventListener('mouseout', undoStop, false);
 document.getElementById("undo").addEventListener('mouseup', undoStop, false);
 document.getElementById("undo").addEventListener('mousedown', undoStart, false);
 
+// Support touch devices
+document.getElementById("undo").addEventListener('touchend', undoStop, false);
+document.getElementById("undo").addEventListener('touchcancel', undoStop, false);
+document.getElementById("undo").addEventListener('touchstart', undoStart, false);
+
 function undoStop() {
     clearInterval(interval);
     fullyShade(previewAlpha);
@@ -323,6 +334,8 @@ $(document).on("keypress", function(event){
         setBrush('stroke');
     } else if(event.key == "f"){
         setBrush('fill');
+    } else if(event.key == "t") {
+        setBrush('line');
     } else if(event.key == "t") {
         saveCanvas();
     }
