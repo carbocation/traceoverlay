@@ -366,33 +366,33 @@ $(document).on("keypress", function(event){
     // console.log(event); 
     if(event.key == "e"){
         setBrush('eraser');
-        flashMessage("Eraser mode");
+        flashMessage("Eraser mode" + " (key " + event.key + ")");
     } else if(event.key == "s"){
         setBrush('stroke');
-        flashMessage("Brush: " + brush);
+        flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "f"){
         setBrush('fill');
-        flashMessage("Brush: " + brush);
+        flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "l") {
         setBrush('line');
-        flashMessage("Brush: " + brush);
+        flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "n") {
         saveCanvas();
     } else if(event.key == "z") {
         setBrushSize(brushSize - 1);
-        flashMessage("Brush size now " + brushSize);
+        flashMessage("Brush size now " + brushSize + " (key " + event.key + ")");
     } else if(event.key == "x") {
         setBrushSize(brushSize + 1);
-        flashMessage("Brush size now " + brushSize);
+        flashMessage("Brush size now " + brushSize + " (key " + event.key + ")");
     } else if(event.key == "q") {
         newBrushName = prevBrush();
-        flashMessage("Brush: " + newBrushName);
+        flashMessage("Brush: " + newBrushName + " (key " + event.key + ")");
     } else if(event.key == "w") {
         newBrushName = nextBrush();
-        flashMessage("Brush: " + newBrushName);
+        flashMessage("Brush: " + newBrushName + " (key " + event.key + ")");
     } else if(event.key == "h") {
         msg = toggleVisibility();
-        flashMessage(msg + " canvas");
+        flashMessage(msg + " canvas" + " (key " + event.key + ")");
     }
 });
 
