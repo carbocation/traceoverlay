@@ -18,18 +18,20 @@
 </style>
 <script>
 
-    {{/* Pre-existing annotation*/}}
     var preExistingImage = document.createElement("img");
     preExistingImage.width = {{$.Data.Width}};
     preExistingImage.height = {{$.Data.Height}};
-    preExistingImage.src = "data:image/png;base64,{{$.Data.EncodedOverlayImage}}";
     
     $(document).ready(function(){
         setBrushColor({{(index $.Data.Labels 1).Color}})
     })
 
     {{if $.Data.HasOverlay}}
-    document.onreadystatechange = function() {
+    
+    {{/* Pre-existing annotation  - only populate if it exists. */}}
+    preExistingImage.src = "data:image/png;base64,{{$.Data.EncodedOverlayImage}}";
+
+    $(document).ready(function(){
         // TODO: Is this appropriate?
         // document.onreadystatechange();
 
@@ -40,7 +42,7 @@
 
         // Make translucent, if configured
         fullyShade(previewAlpha);
-    }
+    })
     {{end}}
 </script>
 {{end}}
