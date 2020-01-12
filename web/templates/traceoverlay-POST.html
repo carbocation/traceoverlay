@@ -21,7 +21,7 @@
 <h1>Saved Overlay</h1>
 <span>Project: <a href="/listproject">{{$.Data.Project}}</a>. Zip: {{$.Data.ManifestEntry.Zip}}. Dicom: {{$.Data.ManifestEntry.Dicom}}</span>
 <br />
-<span><a class="btn btn-med btn-info" href="/traceoverlay/{{$.Data.NextManifestIndex}}">Next: {{$.Data.NextManifestIndex}}</a></span>
+<span><a id="nextPage" class="btn btn-med btn-info" href="/traceoverlay/{{$.Data.NextManifestIndex}}">Next: {{$.Data.NextManifestIndex}}</a></span>
 <br />
 
 <canvas 
@@ -30,4 +30,14 @@ class="traceCanvas"
 id="imgCanvas" 
 width="{{$.Data.Width}}" 
 height="{{$.Data.Height}}"></canvas>
+
+<script>
+$(document).on("keypress", function(event){
+    event.preventDefault();
+    // console.log(event); 
+    if(event.key == "n") {
+        document.getElementById('nextPage').click();
+    }
+});
+</script>
 {{end}}
