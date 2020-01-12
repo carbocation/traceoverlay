@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/carbocation/genomisc/overlay"
+	"github.com/carbocation/genomisc/ukbb/bulkprocess"
 	"github.com/gorilla/mux"
 	"golang.org/x/image/bmp"
 )
@@ -73,7 +74,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		im, err = ExtractImageFromLocalFile(manifestEntry.Dicom, h.Global.Config.ImageSuffix, h.Global.Config.ImagePath)
 	} else {
 		pathPart := path.Dir(h.Global.ManifestPath)
-		im, err = ExtractDicomFromLocalFile(fmt.Sprintf("%s/%s", pathPart, manifestEntry.Zip), manifestEntry.Dicom, true)
+		im, err = bulkprocess.ExtractDicomFromLocalFile(fmt.Sprintf("%s/%s", pathPart, manifestEntry.Zip), manifestEntry.Dicom, true)
 	}
 	if err != nil {
 		HTTPError(h, w, r, err)
