@@ -71,7 +71,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 	var im image.Image
 
 	if h.Global.Config.PreParsed {
-		im, err = ExtractImageFromLocalFile(manifestEntry.Dicom, h.Global.Config.ImageSuffix, h.Global.Config.ImagePath)
+		im, err = bulkprocess.ExtractImageFromLocalFile(manifestEntry.Dicom, h.Global.Config.ImageSuffix, h.Global.Config.ImagePath)
 	} else {
 		pathPart := path.Dir(h.Global.ManifestPath)
 		im, err = bulkprocess.ExtractDicomFromLocalFile(fmt.Sprintf("%s/%s", pathPart, manifestEntry.Zip), manifestEntry.Dicom, true)
