@@ -35,12 +35,14 @@ function setBrushColor(color) {
     if(color == "") {
 
         brushColor = "rgba(0, 0, 0, 1)";
-        setBrush("eraser");
+        // setBrush("eraser");
         return
     }
 
     brushColor = color;
-    setBrush("stroke");
+    if(brush == "fill" || brush == "eraser") {
+        setBrush("stroke");
+    }
 }
 
 function setBrushSize(size) {
@@ -68,6 +70,10 @@ function setBrush(newBrush) {
         console.log("Creating opaque brush")
         // context.fillStyle = "rgba(0, 0, 0, 1)";
     }
+
+    if(brush == "ekg") {
+        setBrushSize(canvas.height);
+    }
 }
 
 // Handlers for the position of the mouse, and whether or not the mouse button
@@ -93,16 +99,21 @@ function stop(e) {
 
     fullyShade(previewAlpha);
 
+    thisY = pos.y;
+    if(brush == "ekg") {
+        thisY = canvas.height / 2;
+    }
+
     points.push({
         x: pos.x,
-        y: pos.y,
+        y: thisY,
         brush: brush,
         size: brushSize,
         color: brushColor,
         mode: "end"
     });
     lastX = pos.x;
-    lastY = pos.y;
+    lastY = thisY;
 
     mouseDown = false;
 }
@@ -111,12 +122,17 @@ function stop(e) {
 function start(e) {
     var pos = getMousePos(canvas, e);
 
+    thisY = pos.y;
+    if(brush == "ekg") {
+        thisY = canvas.height / 2;
+    }
+
     lastX = pos.x;
-    lastY = pos.y;
+    lastY = thisY;
 
     points.push({
         x: pos.x,
-        y: pos.y,
+        y: thisY,
         brush: brush,
         size: brushSize,
         color: brushColor,
@@ -141,13 +157,15 @@ function start(e) {
     }
 
     context.beginPath();
+    // context.lineJoin = 'round';
+    // context.lineCap = 'round';
     
     // Ensure that brush vars are set
     if(context.lineWidth != brushSize) {
         context.lineWidth = brushSize;
     }
 
-    context.moveTo(pos.x, pos.y);
+    context.moveTo(pos.x, thisY);
 
     mouseDown = true;
 }
@@ -168,20 +186,25 @@ function draw(e) {
     context.fillStyle = brushColor;
     context.strokeStyle = brushColor;
 
-    context.lineTo(pos.x, pos.y);
+    thisY = pos.y;
+    if(brush == "ekg") {
+        thisY = canvas.height / 2;
+    }
+
+    context.lineTo(pos.x, thisY);
     context.stroke();
 
     // command pattern stuff
     points.push({
         x: pos.x,
-        y: pos.y,
+        y: thisY,
         brush: brush,
         size: brushSize,
         color: brushColor,
         mode: "draw"
     });
     lastX = pos.x;
-    lastY = pos.y;
+    lastY = thisY;
 }
 
 canvas.addEventListener('mousemove', draw, false);
@@ -369,6 +392,9 @@ $(document).on("keypress", function(event){
         flashMessage("Eraser mode" + " (key " + event.key + ")");
     } else if(event.key == "s"){
         setBrush('stroke');
+        flashMessage("Brush: " + brush + " (key " + event.key + ")");
+    } else if(event.key == "k"){
+        setBrush('ekg');
         flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "f"){
         setBrush('fill');
