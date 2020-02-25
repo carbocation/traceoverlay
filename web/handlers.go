@@ -124,6 +124,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		Height              int
 		HasOverlay          bool
 		EncodedOverlayImage string
+		DefaultBrush        string
 		Labels              []overlay.Label
 	}{
 		h.Global.Project,
@@ -134,6 +135,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		im.Bounds().Dy(),
 		manifestEntry.HasOverlayFromProject,
 		strings.NewReplacer("\n", "", "\r", "").Replace(encodedOverlayString),
+		h.Config.DefaultBrush,
 		h.Config.Labels.Sorted(),
 	}
 

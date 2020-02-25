@@ -24,6 +24,10 @@
     
     $(document).ready(function(){
         setBrushColor({{(index $.Data.Labels 1).Color}})
+
+        {{if $.Data.DefaultBrush}}
+            setBrush("{{$.Data.DefaultBrush}}");
+        {{end}}
     })
 
     {{if $.Data.HasOverlay}}
