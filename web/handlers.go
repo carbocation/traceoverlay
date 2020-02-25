@@ -174,10 +174,13 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 		NextManifestIndex: nextManifestIndex,
 	}
 
+	// Permit uploads up to 128 megabytes (go default is 10 megabytes)
+	r.Body = http.MaxBytesReader(w, r.Body, 128*1024*1024)
+
 	parsedImage := strings.SplitAfterN(r.PostFormValue("imgBase64"), ",", 2)
 	if len(parsedImage) < 2 {
 		log.Println(r.FormValue("imgBase64"))
-		HTTPError(h, w, r, fmt.Errorf("Parsed image was shorter than expected"))
+		HTTPError(h, w, r, fmt.Errorf("Parsed image had fewer parts than expected"))
 		return
 	}
 
@@ -232,8 +235,8 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 	base64Image := base64.StdEncoding.EncodeToString(imBuff.Bytes())
 
 	output.EncodedImage = base64Image
-	output.Width = bmpImage.Bounds().Dx()
-	output.Height = bmpImage.Bounds().Dy()
+	output.Width = decoded.Bounds().Dx()
+	output.Height = decoded.Bounds().Dy()
 
 	Render(h, w, r, "Trace Overlay", "traceoverlay-POST.html", output, nil)
 }
