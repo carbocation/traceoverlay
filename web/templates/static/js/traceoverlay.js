@@ -218,35 +218,60 @@ canvas.addEventListener('mousedown', start, false);
 // http://bencentra.com/code/2014/12/05/html5-canvas-touch-events.html
 function getTouchPos(canvasDom, touchEvent) {
     var rect = canvasDom.getBoundingClientRect();
+    var touch = touchEvent.targetTouches[0];
     return {
-        x: touchEvent.touches[0].clientX - rect.left,
-        y: touchEvent.touches[0].clientY - rect.top
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
     };
 }
 canvas.addEventListener('touchmove', function (e) {
-    var touch = e.touches[0];
+    if (e.touches.length > 1) {
+        return true;
+    }
+
+    var touch = e.targetTouches[0];
     var mouseEvent = new MouseEvent("mousemove", {
         clientX: touch.clientX,
         clientY: touch.clientY
     });
     canvas.dispatchEvent(mouseEvent);
+    e.preventDefault();
+    return false;
 }, false);
 canvas.addEventListener('touchcancel', function (e) {
+    if (e.touches.length > 1) {
+        return true;
+    }
+
     var mouseEvent = new MouseEvent("mouseup", {});
     canvas.dispatchEvent(mouseEvent);
+    e.preventDefault();
+    return false;
 }, false);
 canvas.addEventListener('touchend', function (e) {
+    if (e.touches.length > 1) {
+        return true;
+    }
+
     var mouseEvent = new MouseEvent("mouseup", {});
     canvas.dispatchEvent(mouseEvent);
+    e.preventDefault();
+    return false;
 }, false);
 canvas.addEventListener('touchstart', function (e) {
+    if (e.touches.length > 1) {
+        return true;
+    }
+
     mousePos = getTouchPos(canvas, e);
-    var touch = e.touches[0];
+    var touch = e.targetTouches[0];
     var mouseEvent = new MouseEvent("mousedown", {
         clientX: touch.clientX,
         clientY: touch.clientY
     });
     canvas.dispatchEvent(mouseEvent);
+    e.preventDefault();
+    return false;
 }, false);
 
 
