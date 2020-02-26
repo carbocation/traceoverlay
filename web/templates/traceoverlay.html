@@ -49,6 +49,38 @@
     })
     {{end}}
 </script>
+
+<script>
+function testscale() {
+    var viewScale = new FlameViewportScale();
+    var currentScale = viewScale.getScale();
+
+    alert(viewScale.getScale());
+}
+
+if (window.visualViewport) {
+    // alert("We have a viewport");
+    // testscale();
+    var windowtop = document.getElementById("drawmessage");
+
+    function onWindowScroll() {
+        windowtop.style.top = window.visualViewport.offsetTop + "px";
+        windowtop.style.left = window.visualViewport.offsetLeft + "px";
+        windowtop.style.width = window.visualViewport.width + "px";
+
+        var viewScale = new FlameViewportScale();
+        var currentScale = viewScale.getScale();
+
+        alert(viewScale.getScale());
+    }
+    onWindowScroll();
+    window.visualViewport.addEventListener("resize", onWindowScroll);
+    window.visualViewport.addEventListener("scroll", onWindowScroll);
+    // https://developers.google.com/web/updates/2017/09/visual-viewport-api#gotchas
+    window.addEventListener('scroll', onWindowScroll);
+}
+</script>
+
 {{end}}
 
 {{define "bodyinsert"}}
@@ -58,6 +90,7 @@
 {{define "page"}}
 <span>Project: <a href="/listproject">{{$.Data.Project}}</a>. Zip: {{$.Data.ManifestEntry.Zip}}. Dicom: {{$.Data.ManifestEntry.Dicom}}</span>
 <br />
+<button class="btn btn-primary" onclick="javascript:testscale();">SCALETEST</button>
 <button class="btn btn-primary" onclick="javascript:setBrushSize(1);">● Size:1px</button>
 <button class="btn btn-primary" onclick="javascript:setBrushSize(2);">● Size:2px</button>
 <button class="btn btn-primary" onclick="javascript:setBrushSize(3);">● Size:3px</button>
@@ -105,4 +138,5 @@ height="85"></canvas> -->
 <script src="{{.Assets}}/js/traceoverlay.js"></script>
 <script src="{{.Assets}}/js/bmp.js"></script>
 <script src="{{.Assets}}/js/fill.js"></script>
+<script src="{{.Assets}}/js/FlameViewportScale.js"></script>
 {{end}}
