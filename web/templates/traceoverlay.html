@@ -49,6 +49,18 @@
     })
     {{end}}
 </script>
+<script>
+    function rePosition() {
+        var drag = document.getElementById("drawmessage");
+
+        drag.style.left = window.innerWidth/2 + window.pageXOffset + 'px';
+        drag.style.top = window.innerHeight/2 + window.pageYOffset + 'px';
+    }
+
+    window.addEventListener('scroll', function(e){
+        rePosition();
+    })
+</script>
 {{end}}
 
 {{define "bodyinsert"}}
