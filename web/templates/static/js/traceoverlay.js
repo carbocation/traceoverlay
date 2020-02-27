@@ -225,41 +225,57 @@ function getTouchPos(canvasDom, touchEvent) {
     };
 }
 canvas.addEventListener('touchmove', function (e) {
-    if (e.touches.length > 1) {
+    // If we have one or more events but they aren't from a stylus, we will
+    // ignore them.
+    var hasStylusTouch = false;
+    for(var i = 0; i < e.changedTouches.length; i++) {
+        touch = e.changedTouches[i];
+        if(touch.touchType == "stylus") {
+            hasStylusTouch = true;
+        }
+    }
+    if (!hasStylusTouch) {
         return true;
     }
 
-    var touch = e.targetTouches[0];
+    e.preventDefault();
+    var touch = e.changedTouches[0];
     var mouseEvent = new MouseEvent("mousemove", {
         clientX: touch.clientX,
         clientY: touch.clientY
     });
     canvas.dispatchEvent(mouseEvent);
-    e.preventDefault();
     return false;
 }, false);
 canvas.addEventListener('touchcancel', function (e) {
-    if (e.touches.length > 1) {
-        return true;
-    }
-
-    var mouseEvent = new MouseEvent("mouseup", {});
-    canvas.dispatchEvent(mouseEvent);
     e.preventDefault();
+    var mouseEvent = new MouseEvent("mouseup", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    canvas.dispatchEvent(mouseEvent);
     return false;
 }, false);
 canvas.addEventListener('touchend', function (e) {
-    if (e.touches.length > 1) {
-        return true;
-    }
-
-    var mouseEvent = new MouseEvent("mouseup", {});
-    canvas.dispatchEvent(mouseEvent);
     e.preventDefault();
+    var mouseEvent = new MouseEvent("mouseup", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    canvas.dispatchEvent(mouseEvent);
     return false;
 }, false);
 canvas.addEventListener('touchstart', function (e) {
-    if (e.touches.length > 1) {
+    // If we have one or more events but they aren't from a stylus, we will
+    // ignore them.
+    var hasStylusTouch = false;
+    for(var i = 0; i < e.targetTouches.length; i++) {
+        touch = e.targetTouches[i];
+        if(touch.touchType == "stylus") {
+            hasStylusTouch = true;
+        }
+    }
+    if (!hasStylusTouch) {
         return true;
     }
 
