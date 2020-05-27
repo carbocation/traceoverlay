@@ -159,6 +159,14 @@ function start(e) {
         return false
     }
 
+    if(brush == "exact") {
+        drawExactPoint(context, brushColor, brushSize, pos.x, pos.y);
+
+        // mouseDown = false;
+        mouseDown = true;
+        return;
+    }
+
     context.beginPath();
     // context.lineJoin = 'round';
     // context.lineCap = 'round';
@@ -194,9 +202,6 @@ function draw(e) {
         thisY = canvas.height / 2;
     }
 
-    context.lineTo(pos.x, thisY);
-    context.stroke();
-
     // command pattern stuff
     points.push({
         x: pos.x,
@@ -208,6 +213,40 @@ function draw(e) {
     });
     lastX = pos.x;
     lastY = thisY;
+
+    if(brush == "exact") {
+        drawExactPoint(context, brushColor, brushSize, pos.x, thisY);
+        return;
+    }
+
+    context.lineTo(pos.x, thisY);
+    context.stroke();
+}
+
+function drawExactPoint(context, brushColor, brushSize, posX, posY) {
+    // The purpose of this is to avoid browsers' antialiasing systems.
+    // See https://stackoverflow.com/a/4900656/199475
+
+    fakepxcol = hexToRGBA(brushColor);
+    var fakepx = context.createImageData(brushSize,brushSize);
+    for(led in fakepx.data) {
+        switch(led%4) {
+            case 0:
+                fakepx.data[led] = fakepxcol.r;
+                break;
+            case 1:
+                fakepx.data[led] = fakepxcol.g;
+                break;
+            case 2:
+                fakepx.data[led] = fakepxcol.b;
+                break;
+            case 3:
+                fakepx.data[led] = fakepxcol.a;
+                break;
+        }
+    }
+
+    context.putImageData( fakepx, posX, posY); 
 }
 
 canvas.addEventListener('mousemove', draw, false);
@@ -392,6 +431,12 @@ function redrawAll() {
             context.strokeStyle = pt.color;
             context.fillStyle = pt.color;
         }
+
+        if (pt.brush == "exact") {
+            drawExactPoint(context, pt.color, pt.size, pt.x, pt.y);
+            continue;
+        }
+
         if (pt.mode == "begin") { // || begin) {
             context.beginPath();
             context.moveTo(pt.x, pt.y);
@@ -439,6 +484,9 @@ $(document).on("keypress", function(event){
         flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "k"){
         setBrush('ekg');
+        flashMessage("Brush: " + brush + " (key " + event.key + ")");
+    } else if(event.key == "t"){
+        setBrush('exact');
         flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "f"){
         setBrush('fill');
