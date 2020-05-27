@@ -15,7 +15,7 @@ var previewAlpha = 160;
 var saveAlpha = 255;
 
 // Brush variables
-var brush = "stroke";
+var brush = "exact";
 var brushSize = 1;
 var brushColor = "#ff0000"; //"rgba(255, 0, 0, 1)"; //"#FF0000"; //{r:0xff, g:0x00, b:0x00, a:0xff}; //"#FF0000";
 
@@ -44,13 +44,13 @@ function setBrushColor(color) {
 
     brushColor = color;
     if(brush == "fill" || brush == "eraser") {
-        setBrush("stroke");
+        setBrush("exact");
     }
 }
 
 function setBrushSize(size) {
     if(brush == "fill") {
-        brush = "stroke";
+        brush = "exact";
     }
 
     if(size < 1) {
@@ -159,8 +159,8 @@ function start(e) {
         return false
     }
 
-    if(brush == "exact") {
-        drawExactPoint(context, brushColor, brushSize, pos.x, pos.y);
+    if(brush == "exact" || brush == "eraser") {
+        drawExactPoint(context, brush, brushColor, brushSize, pos.x, pos.y);
 
         // mouseDown = false;
         mouseDown = true;
@@ -214,8 +214,8 @@ function draw(e) {
     lastX = pos.x;
     lastY = thisY;
 
-    if(brush == "exact") {
-        drawExactPoint(context, brushColor, brushSize, pos.x, thisY);
+    if(brush == "exact" || brush == "eraser") {
+        drawExactPoint(context, brush, brushColor, brushSize, pos.x, thisY);
         return;
     }
 
@@ -223,11 +223,17 @@ function draw(e) {
     context.stroke();
 }
 
-function drawExactPoint(context, brushColor, brushSize, posX, posY) {
+function drawExactPoint(context, brush, brushColor, brushSize, posX, posY) {
     // The purpose of this is to avoid browsers' antialiasing systems.
     // See https://stackoverflow.com/a/4900656/199475
 
     fakepxcol = hexToRGBA(brushColor);
+    if(brush == "eraser") {
+        // hexToRGBA just sets opacity to the default semi-transparent background.
+        // so, override it for the eraser to be transparent.
+        fakepxcol.a = 0;
+    }
+    // console.log(fakepxcol);
     var fakepx = context.createImageData(brushSize,brushSize);
     for(led in fakepx.data) {
         switch(led%4) {
@@ -432,8 +438,8 @@ function redrawAll() {
             context.fillStyle = pt.color;
         }
 
-        if (pt.brush == "exact") {
-            drawExactPoint(context, pt.color, pt.size, pt.x, pt.y);
+        if (pt.brush == "exact" || pt.brush == "eraser") {
+            drawExactPoint(context, pt.brush, pt.color, pt.size, pt.x, pt.y);
             continue;
         }
 
@@ -479,13 +485,13 @@ $(document).on("keypress", function(event){
     if(event.key == "e"){
         setBrush('eraser');
         flashMessage("Eraser mode" + " (key " + event.key + ")");
-    } else if(event.key == "s"){
+    } else if(event.key == "t"){
         setBrush('stroke');
         flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "k"){
         setBrush('ekg');
         flashMessage("Brush: " + brush + " (key " + event.key + ")");
-    } else if(event.key == "t"){
+    } else if(event.key == "s"){
         setBrush('exact');
         flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "f"){
