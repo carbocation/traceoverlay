@@ -16,7 +16,8 @@ var saveAlpha = 255;
 
 // Brush variables
 var brush = "exact";
-var brushSize = 1;
+var defaultBrushSize = 1;
+var brushSize = defaultBrushSize;
 var brushColor = "#ff0000"; //"rgba(255, 0, 0, 1)"; //"#FF0000"; //{r:0xff, g:0x00, b:0x00, a:0xff}; //"#FF0000";
 
 // Undo
@@ -61,6 +62,12 @@ function setBrushSize(size) {
 }
 
 function setBrush(newBrush) {
+    // If the old brush was fill, reset our brush size to default:
+    var oldBrush = brush;
+    if(oldBrush == "fill") {
+        brushSize = defaultBrushSize;
+    }
+
     brush = newBrush;
 
     if(brush == "eraser") {
