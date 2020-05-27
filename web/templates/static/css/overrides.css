@@ -18,3 +18,14 @@
 	visibility: hidden;
 	padding:4px;
 }
+
+#imgCanvas {
+    margin-left: auto;
+    margin-right: auto;
+	display: block;
+	image-rendering: pixelated;
+}
+
+image {
+	image-rendering: pixelated;
+}
