@@ -36,7 +36,7 @@ func UpdateManifest() error {
 	defer global.m.Unlock()
 
 	// First, look in the project directory to get updates to annotations.
-	files, err := ioutil.ReadDir(filepath.Join(global.Project))
+	files, err := ioutil.ReadDir(filepath.Join(global.Config.LabelPath))
 	if os.IsNotExist(err) {
 		// Not a problem
 	} else if err != nil {

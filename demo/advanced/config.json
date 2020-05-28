@@ -1,6 +1,6 @@
 {
     "manifest": "/mnt/storage/projects/traceoverlay/demo/advanced/manifest.tsv",
-    "project": "/mnt/storage/projects/traceoverlay/demo/advanced/annotations",
+    "label_path": "/mnt/storage/projects/traceoverlay/demo/advanced/annotations",
     "image_path": "/mnt/storage/projects/traceoverlay/demo/raw",
     "image_suffix": "",
     "preparsed": true,

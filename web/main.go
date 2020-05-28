@@ -51,47 +51,33 @@ func main() {
 	log.Println("Launched with arguments:")
 	log.Println(os.Args)
 
-	jsonConfig := flag.String("config", "", "Path to JSON file with configuration. If this includes 'manifest' and 'project' keys, then those do not need to be set on the command line. If set on the command line, they will override the config file.")
-	manifest := flag.String("manifest", "", "Tab-delimited manifest file which contains a zip_file and a dicom_file column (at least).")
-	project := flag.String("project", "", "Project name. Defines a folder into which all overlays will be written.")
+	jsonConfig := flag.String("config", "", "Path to JSON file with configuration.")
 	port := flag.Int("port", 9019, "Port for HTTP server")
-	//dbName := flag.String("db_name", "pubrank", "Name of the database schema to connect to")
 	flag.Parse()
 
 	var config overlay.JSONConfig
 	var err error
-	if *jsonConfig != "" {
-		config, err = overlay.ParseJSONConfigFromPath(*jsonConfig)
-		if err == nil {
-			if *manifest == "" {
-				*manifest = config.ManifestPath
-			}
-			if *project == "" {
-				*project = config.Project
-			}
-			if *port == 0 {
-				*port = config.Port
-			}
-		} else {
-			log.Fatalln(err)
-		}
 
-		if !config.Labels.Valid() {
-			config.Labels = make(overlay.LabelMap)
-		}
-
-		for _, label := range config.Labels {
-			if label.Color == "#000000" && label.ID != 0 {
-				log.Fatalf("Configuration problem: label %+v has color #000000, which is reserved for the background (label ID 0).\n", label)
-			}
-		}
-
-		log.Printf("Using configuration:\n%s\n", spew.Sdump(config))
-
-		log.Printf("Labels in effect:\n%v\n", config.Labels.Sorted())
+	config, err = overlay.ParseJSONConfigFromPath(*jsonConfig)
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	if *project == "" {
+	if !config.Labels.Valid() {
+		config.Labels = make(overlay.LabelMap)
+	}
+
+	for _, label := range config.Labels {
+		if label.Color == "#000000" && label.ID != 0 {
+			log.Fatalf("Configuration problem: label %+v has color #000000, which is reserved for the background (label ID 0).\n", label)
+		}
+	}
+
+	log.Printf("Using configuration:\n%s\n", spew.Sdump(config))
+
+	log.Printf("Labels in effect:\n%v\n", config.Labels.Sorted())
+
+	if config.LabelPath == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -99,16 +85,18 @@ func main() {
 	// If the project isn't a fully path that will store the annotations
 	// (inferred by the presence of a path delimiter), assume it's a
 	// subdirectory and create it if it does not exist:
-	newpath := *project
-	if !strings.Contains(*project, "/") {
-		log.Printf("Creating directory ./%s/ if it does not yet exist\n", *project)
-		newpath = filepath.Join(".", *project)
+	if !strings.Contains(config.LabelPath, "/") {
+		newpath := config.LabelPath
+		log.Printf("Creating directory ./%s/ if it does not yet exist\n", config.LabelPath)
+		newpath = filepath.Join(".", config.LabelPath)
 		if err := os.MkdirAll(newpath, os.ModePerm); err != nil {
 			log.Fatalln(err)
 		}
+
+		config.LabelPath = newpath
 	}
 
-	manifestLines, err := ReadManifest(*manifest, *project, config.ImagePath)
+	manifestLines, err := ReadManifest(config.ManifestPath, config.LabelPath, config.ImagePath)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -121,8 +109,8 @@ func main() {
 		log:       log.New(os.Stderr, log.Prefix(), log.Ldate|log.Ltime),
 		db:        nil,
 
-		Project:      newpath,
-		ManifestPath: *manifest,
+		Project:      filepath.Base(config.LabelPath),
+		ManifestPath: config.ManifestPath,
 		manifest:     manifestLines,
 
 		Config: config,
