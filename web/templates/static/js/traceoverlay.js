@@ -347,7 +347,7 @@ canvas.addEventListener('touchstart', function (e) {
 
 
 function saveCanvas() {
-    // context.globalAlpha = 1.0;
+    redrawAll();
     fullyShade(saveAlpha);
 
     var base64Image = CanvasToBMP.toDataURL(document.getElementById('imgCanvas'));
@@ -360,6 +360,9 @@ function saveCanvas() {
 }
 
 function ajaxSaveCanvas(imageIndex) {
+    redrawAll();
+    fullyShade(saveAlpha);
+
     var base64Image = CanvasToBMP.toDataURL(document.getElementById('imgCanvas'));
 
     $.ajax({
@@ -565,16 +568,17 @@ $(document).on("keyup", function(event){
     }
 });
 
-var canvasVisibility = "visible";
+var canvasVisibility = "translucent";
 function toggleVisibilityRev() {
     if(canvasVisibility == "opaque"){
-        canvasVisibility = "visible";
+        canvasVisibility = "translucent";
         fullyShade(previewAlpha);
 
-        return "Revealing"
-    } else if(canvasVisibility == "visible") {
+        return "Translucent"
+    } else if(canvasVisibility == "translucent") {
         canvasVisibility = "hidden";
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        fullyShade(0);
+        // context.clearRect(0, 0, canvas.width, canvas.height);
 
         return "Hiding"
     } else if(canvasVisibility == "hidden") {
@@ -588,19 +592,20 @@ function toggleVisibilityRev() {
 
 function toggleVisibility() {
     if(canvasVisibility == "hidden"){
-        canvasVisibility = "visible";
+        canvasVisibility = "translucent";
         redrawAll();
         fullyShade(previewAlpha);
 
-        return "Revealing"
-    } else if(canvasVisibility == "visible") {
+        return "Translucent"
+    } else if(canvasVisibility == "translucent") {
         canvasVisibility = "opaque";
         fullyShade(saveAlpha);
 
         return "Max Opacity"
     } else if(canvasVisibility == "opaque") {
         canvasVisibility = "hidden";
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        fullyShade(0);
+        // context.clearRect(0, 0, canvas.width, canvas.height);
 
         return "Hiding"
     }
