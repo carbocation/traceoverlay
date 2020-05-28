@@ -461,6 +461,7 @@ function redrawAll() {
     // console.log("Finished re-drawing");
 }
 
+// Undo tools
 var interval;
 document.getElementById("undo").addEventListener('mouseout', undoStop, false);
 document.getElementById("undo").addEventListener('mouseup', undoStop, false);
@@ -481,53 +482,111 @@ function undoStart() {
 }
 
 function undoLast() {
-    points.pop();
+    if( (points.length < 1) ) {
+        // No points left in the undo chain, so don't try to pop off.
+        return
+    }
+
+    res = points.pop();
     redrawAll();
 }
 
 // Switch with keys
-$(document).on("keypress", function(event){
-    event.preventDefault();
-    // console.log(event); 
+var udown = false;
+$(document).on("keydown", function(event){
+    var hit = false;
     if(event.key == "e"){
+        var hit = true;
         setBrush('eraser');
         flashMessage("Eraser mode" + " (key " + event.key + ")");
     } else if(event.key == "t"){
+        var hit = true;
         setBrush('stroke');
         flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "k"){
+        var hit = true;
         setBrush('ekg');
         flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "s"){
+        var hit = true;
         setBrush('exact');
         flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "f"){
+        var hit = true;
         setBrush('fill');
         flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "l") {
+        var hit = true;
         setBrush('line');
         flashMessage("Brush: " + brush + " (key " + event.key + ")");
     } else if(event.key == "n") {
+        var hit = true;
         saveCanvas();
     } else if(event.key == "z") {
+        var hit = true;
         setBrushSize(brushSize - 1);
         flashMessage("Brush size now " + brushSize + " (key " + event.key + ")");
     } else if(event.key == "x") {
+        var hit = true;
         setBrushSize(brushSize + 1);
         flashMessage("Brush size now " + brushSize + " (key " + event.key + ")");
     } else if(event.key == "q") {
+        var hit = true;
         newBrushName = prevBrush();
         flashMessage("Brush: " + newBrushName + " (key " + event.key + ")");
     } else if(event.key == "w") {
+        var hit = true;
         newBrushName = nextBrush();
         flashMessage("Brush: " + newBrushName + " (key " + event.key + ")");
     } else if(event.key == "h") {
+        var hit = true;
         msg = toggleVisibility();
         flashMessage(msg + " canvas" + " (key " + event.key + ")");
+    } else if(event.key == "g") {
+        var hit = true;
+        msg = toggleVisibilityRev();
+        flashMessage(msg + " canvas" + " (key " + event.key + ")");
+    } else if(event.key == "u") {
+        var hit = true;
+        if(!udown) {
+            udown = true;
+            undoStart();
+        }
+    }
+
+    if(hit) {
+        event.preventDefault();
+    }
+});
+
+$(document).on("keyup", function(event){
+    if(event.key == "u"){
+        udown = false;
+        undoStop();
     }
 });
 
 var canvasVisibility = "visible";
+function toggleVisibilityRev() {
+    if(canvasVisibility == "opaque"){
+        canvasVisibility = "visible";
+        fullyShade(previewAlpha);
+
+        return "Revealing"
+    } else if(canvasVisibility == "visible") {
+        canvasVisibility = "hidden";
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        return "Hiding"
+    } else if(canvasVisibility == "hidden") {
+        canvasVisibility = "opaque";
+        redrawAll();
+        fullyShade(saveAlpha);
+
+        return "Max Opacity"
+    }
+}
+
 function toggleVisibility() {
     if(canvasVisibility == "hidden"){
         canvasVisibility = "visible";
@@ -535,7 +594,12 @@ function toggleVisibility() {
         fullyShade(previewAlpha);
 
         return "Revealing"
-    } else {
+    } else if(canvasVisibility == "visible") {
+        canvasVisibility = "opaque";
+        fullyShade(saveAlpha);
+
+        return "Max Opacity"
+    } else if(canvasVisibility == "opaque") {
         canvasVisibility = "hidden";
         context.clearRect(0, 0, canvas.width, canvas.height);
 
