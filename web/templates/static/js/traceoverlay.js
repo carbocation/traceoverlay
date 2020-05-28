@@ -376,10 +376,9 @@ function ajaxSaveCanvas(imageIndex) {
 
 function downloadCanvas() {
 
-    var link = document.createElement('a');
-    link.download = 'canvas.bmp';
-    link.href = CanvasToBMP.toBlob(document.getElementById('imgCanvas'));
-    link.click();
+    // Must convert to image/octet-stream to force the browser to download
+    var image = document.getElementById('imgCanvas').toDataURL("image/png").replace("image/png", "image/octet-stream");
+    window.location.href = image;
 
     return
 }
