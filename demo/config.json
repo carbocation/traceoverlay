@@ -3,6 +3,7 @@
     "project": "/mnt/storage/projects/traceoverlay/demo/annotations",
     "image_path": "/mnt/storage/projects/traceoverlay/demo/raw",
     "image_suffix": "",
+    "preparsed": true,
     "port": 9019,
     "labels": {
       "Background": { "id": 0, "color": "" },
