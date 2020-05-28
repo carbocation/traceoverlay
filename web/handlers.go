@@ -70,7 +70,18 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 	manifestEntry := h.Global.Manifest()[manifestIndex]
 	var im image.Image
 
-	if h.Global.Config.PreParsed {
+	if strings.HasPrefix(h.Global.Config.ImagePath, "gs://") {
+		// Google Storage
+		client, err := getGSClient()
+		if err != nil {
+			HTTPError(h, w, r, err)
+			return
+		}
+		im, err = bulkprocess.ExtractDicomFromGoogleStorage(fmt.Sprintf("%s/%s", h.Global.Config.ImagePath, manifestEntry.Zip),
+			manifestEntry.Dicom,
+			true,
+			client)
+	} else if h.Global.Config.PreParsed && !strings.HasPrefix(h.Global.Config.ImagePath, "gs://") {
 		im, err = bulkprocess.ExtractImageFromLocalFile(manifestEntry.Dicom, h.Global.Config.ImageSuffix, h.Global.Config.ImagePath)
 	} else {
 		pathPart := path.Dir(h.Global.ManifestPath)
