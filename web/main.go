@@ -91,7 +91,7 @@ func main() {
 		log.Printf("Labels in effect:\n%v\n", config.Labels.Sorted())
 	}
 
-	if *manifest == "" || *project == "" {
+	if *project == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -108,7 +108,7 @@ func main() {
 		}
 	}
 
-	manifestLines, err := ReadManifest(*manifest, *project)
+	manifestLines, err := ReadManifest(*manifest, *project, config.ImagePath)
 	if err != nil {
 		log.Fatalln(err)
 	}

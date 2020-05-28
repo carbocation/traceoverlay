@@ -62,9 +62,9 @@ func UpdateManifest() error {
 }
 
 // ReadManifest takes the path to a manifest file and extracts each line.
-func ReadManifest(manifestPath, projectPath string) ([]Manifest, error) {
-	// First, look in the project directory to see if there is any annotation.
-	files, err := ioutil.ReadDir(filepath.Join(projectPath))
+func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error) {
+	// First, look in the labelPath to see if there are any annotations.
+	files, err := ioutil.ReadDir(filepath.Join(labelPath))
 	if os.IsNotExist(err) {
 		// Not a problem
 	} else if err != nil {
@@ -78,16 +78,40 @@ func ReadManifest(manifestPath, projectPath string) ([]Manifest, error) {
 		overlaysExist[f.Name()] = struct{}{}
 	}
 
-	f, err := os.Open(manifestPath)
-	if err != nil {
-		return nil, err
-	}
+	var recs [][]string
 
-	cr := csv.NewReader(f)
-	cr.Comma = '\t'
-	recs, err := cr.ReadAll()
-	if err != nil {
-		return nil, err
+	if manifestPath == "" {
+		// No manifest - just read the image directory contents
+		files, err := ioutil.ReadDir(filepath.Join(imagePath))
+		if os.IsNotExist(err) {
+			// Not a problem
+		} else if err != nil {
+			return nil, err
+		}
+
+		recs = make([][]string, 0)
+		recs = append(recs, []string{"dicom_file"})
+
+		for _, f := range files {
+			if f.IsDir() {
+				continue
+			}
+			recs = append(recs, []string{f.Name()})
+		}
+
+	} else {
+		// Read the manifest
+		f, err := os.Open(manifestPath)
+		if err != nil {
+			return nil, err
+		}
+
+		cr := csv.NewReader(f)
+		cr.Comma = '\t'
+		recs, err = cr.ReadAll()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	output := make([]Manifest, 0, len(recs))

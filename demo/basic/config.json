@@ -1,0 +1,13 @@
+{
+    "project": "/mnt/storage/projects/traceoverlay/demo/basic/annotations",
+    "image_path": "/mnt/storage/projects/traceoverlay/demo/raw",
+    "image_suffix": "",
+    "preparsed": true,
+    "port": 9019,
+    "labels": {
+      "Background": { "id": 0, "color": "" },
+      "Cookie": { "id": 1, "color": "#0000ff" },
+      "Tray": { "id": 2, "color": "#ff0000" }
+    }
+  }
+  
