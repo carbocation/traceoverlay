@@ -16,7 +16,7 @@ var saveAlpha = 255;
 
 // Brush variables
 var brush = "exact";
-var defaultBrushSize = 1;
+var defaultBrushSize = 2;
 var brushSize = defaultBrushSize;
 var brushColor = "#ff0000"; //"rgba(255, 0, 0, 1)"; //"#FF0000"; //{r:0xff, g:0x00, b:0x00, a:0xff}; //"#FF0000";
 
