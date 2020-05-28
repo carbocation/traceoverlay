@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -156,7 +155,8 @@ func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error)
 		})
 	}
 
-	sort.Slice(output, generateManifestSorter(output))
+	// Don't sort the manifest - use the manifest order as the sort order
+	// sort.Slice(output, generateManifestSorter(output))
 
 	return output, nil
 }
