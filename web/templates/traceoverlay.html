@@ -18,6 +18,10 @@
 </style>
 <script>
 
+    {{if (ge $.Data.BrushSize 1)}}
+        var defaultBrushSize = {{$.Data.BrushSize}};
+    {{end}}
+
     var preExistingImage = document.createElement("img");
     preExistingImage.width = {{$.Data.Width}};
     preExistingImage.height = {{$.Data.Height}};
