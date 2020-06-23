@@ -33,8 +33,13 @@ function floodFill(newColor, x, y) {
 
         // Move to top most contiguousDown pixel
         while (contiguousUp && operator.y >= 0) {
-            operator.y--
-            contiguousUp = colorMatch(getColorAtPixel(imageData, operator.x, operator.y), baseColor)
+            var yVal = operator.y - 1
+            contiguousUp = colorMatch(getColorAtPixel(imageData, operator.x, yVal), baseColor)
+
+            // Only decrement operator.y if we didn't roll out of bounds
+            if(contiguousUp) {
+                operator.y--
+            }
         }
 
         // Move downward
@@ -61,8 +66,13 @@ function floodFill(newColor, x, y) {
                 contiguousRight = false
             }
 
-            operator.y++
-            contiguousDown = colorMatch(getColorAtPixel(imageData, operator.x, operator.y), baseColor)
+            var yVal = operator.y + 1
+            contiguousDown = colorMatch(getColorAtPixel(imageData, operator.x, yVal), baseColor)
+
+            // Only increment operator.y if we didn't roll out of bounds
+            if(contiguousDown) {
+                operator.y++
+            }
         }
     }
 
