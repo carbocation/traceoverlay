@@ -16,55 +16,7 @@
         touch-action: none;
     }
 </style>
-<script>
 
-    {{if (ge $.Data.BrushSize 1)}}
-        var defaultBrushSize = {{$.Data.BrushSize}};
-    {{end}}
-
-    var preExistingImage = document.createElement("img");
-    preExistingImage.width = {{$.Data.Width}};
-    preExistingImage.height = {{$.Data.Height}};
-    
-    $(document).ready(function(){
-        setBrushColor({{(index $.Data.Labels 1).Color}})
-
-        {{if $.Data.DefaultBrush}}
-            setBrush("{{$.Data.DefaultBrush}}");
-        {{end}}
-    })
-
-    {{if $.Data.HasOverlay}}
-    
-    {{/* Pre-existing annotation  - only populate if it exists. */}}
-    preExistingImage.src = "data:image/png;base64,{{$.Data.EncodedOverlayImage}}";
-
-    $(document).ready(function(){
-        // TODO: Is this appropriate?
-        // document.onreadystatechange();
-
-        var canvas = document.getElementById("imgCanvas");
-        var context = canvas.getContext("2d");
-
-        context.drawImage(preExistingImage, 0, 0);
-
-        // Make translucent, if configured
-        fullyShade(previewAlpha);
-    })
-    {{end}}
-</script>
-<script>
-    function rePosition() {
-        var drag = document.getElementById("drawmessage");
-
-        drag.style.left = window.innerWidth/2 + window.pageXOffset + 'px';
-        drag.style.top = window.innerHeight/2 + window.pageYOffset + 'px';
-    }
-
-    window.addEventListener('scroll', function(e){
-        rePosition();
-    })
-</script>
 {{end}}
 
 {{define "bodyinsert"}}
@@ -117,6 +69,58 @@ class="traceCanvas"
 id="imgCanvas" 
 width="128" 
 height="85"></canvas> -->
+
+<script>
+    {{/* Pre-existing annotation  - only populate if it exists. */}}
+    var preExistingImage = document.createElement("img");
+    preExistingImage.width = {{$.Data.Width}};
+    preExistingImage.height = {{$.Data.Height}};
+</script>
+
+<script>
+
+    {{if (ge $.Data.BrushSize 1)}}
+        var defaultBrushSize = {{$.Data.BrushSize}};
+    {{end}}
+    
+    document.addEventListener('DOMContentLoaded', function(event){
+        setBrushColor({{(index $.Data.Labels 1).Color}})
+
+        {{if $.Data.DefaultBrush}}
+            setBrush("{{$.Data.DefaultBrush}}");
+        {{end}}
+    }, false);
+
+{{if $.Data.HasOverlay}}
+
+    preExistingImage.src = "data:image/png;base64,{{$.Data.EncodedOverlayImage}}";
+
+    // document.addEventListener('DOMContentLoaded', function(event){
+    preExistingImage.onload = function() {
+
+        var canvas = document.getElementById("imgCanvas");
+        var context = canvas.getContext("2d");
+
+        context.drawImage(preExistingImage, 0, 0);
+        fullyShade(previewAlpha);
+    };
+    // }, false);
+
+{{end}}
+
+</script>
+<script>
+    function rePosition() {
+        var drag = document.getElementById("drawmessage");
+
+        drag.style.left = window.innerWidth/2 + window.pageXOffset + 'px';
+        drag.style.top = window.innerHeight/2 + window.pageYOffset + 'px';
+    }
+
+    window.addEventListener('scroll', function(e){
+        rePosition();
+    })
+</script>
 
 <script src="{{.Assets}}/js/traceoverlay.js"></script>
 <script src="{{.Assets}}/js/bmp.js"></script>
