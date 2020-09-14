@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"image"
-	"image/gif"
 	"image/png"
 	"log"
 	"net/http"
@@ -154,55 +153,6 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Render(h, w, r, "Trace Overlay", "traceoverlay.html", output, nil)
-}
-
-func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
-	// Fetch the desired image from the zip file as described in the manifest
-	manifestIdx := mux.Vars(r)["manifest_index"]
-	manifestIndex, err := strconv.Atoi(manifestIdx)
-	if err != nil {
-		HTTPError(h, w, r, fmt.Errorf("No manifest_index passed"))
-		return
-	}
-
-	if manifestIndex >= len(h.Global.Manifest()) {
-		HTTPError(h, w, r, fmt.Errorf("Manifest_index was %d, out of range of the Manifest slice", manifestIndex))
-		return
-	}
-
-	manifestEntry := h.Global.Manifest()[manifestIndex]
-
-	// TODO: Find all dicoms with the same sample ID, instance, and series from
-	// the same Zip file
-	dicomNames := []string{}
-
-	// TODO: Add bulk path so we can Fetch zip
-	log.Println(w, "%s => %s\n", manifestEntry.Zip, manifestEntry.Series)
-
-	// Fetch actual images from Zip
-	client, err := getGSClient()
-	if err != nil {
-		HTTPError(h, w, r, err)
-		return
-	}
-	imageMap, err := bulkprocess.FetchImagesFromZIP(manifestEntry.Zip, false, client)
-	if err != nil {
-		HTTPError(h, w, r, err)
-		return
-	}
-
-	// Create the GIF
-	outGIF, err := bulkprocess.MakeOneGIFFromMap(dicomNames, imageMap, 2)
-	if err != nil {
-		HTTPError(h, w, r, err)
-		return
-	}
-
-	// Send the GIF over the wire
-	if err := gif.EncodeAll(w, outGIF); err != nil {
-		HTTPError(h, w, r, err)
-		return
-	}
 }
 
 func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
