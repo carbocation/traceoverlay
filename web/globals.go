@@ -25,7 +25,7 @@ type Global struct {
 	Config overlay.JSONConfig
 }
 
-func (g Global) Manifest() []Manifest {
+func (g *Global) Manifest() []Manifest {
 	g.m.RLock()
 	defer g.m.RUnlock()
 
