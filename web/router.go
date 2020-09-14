@@ -20,7 +20,7 @@ func router(config *Global) http.Handler {
 	GET.HandleFunc("/goroutines", h.Goroutines)
 	GET.HandleFunc("/{template:(?:about|privacy|TOS|DMCA)}", h.TemplateOnly)
 	GET.HandleFunc("/traceoverlay/{manifest_index}", h.TraceOverlay).Name("traceoverlay")
-	GET.HandleFunc("/traceoverlay/cine/{manifest_index}", h.TraceOverlayCINE).Name("traceoverlay_cine")
+	GET.HandleFunc("/traceoverlay/cine/{zip}/{series}", h.TraceOverlayCINE).Name("traceoverlay_cine")
 	GET.HandleFunc("/listproject", h.ListProject).Name("listproject")
 
 	//
