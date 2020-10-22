@@ -61,7 +61,7 @@ func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 		HTTPError(h, w, r, err)
 		return
 	}
-	imageMap, err := bulkprocess.FetchImagesFromZIP(cineBulkPath+"/"+zipFile, false, client)
+	imageMap, err := bulkprocess.FetchNamedImagesFromZIP(cineBulkPath+"/"+zipFile, false, client, dicomNames)
 	if err != nil {
 		HTTPError(h, w, r, err)
 		return
