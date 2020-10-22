@@ -82,7 +82,10 @@ func initializeCINEManifest() error {
 }
 
 func CINEFetchDicomNames(Zip, Series string) ([]string, error) {
+
+	cineMutex.RLock()
 	if len(cineLookup) == 0 {
+		cineMutex.RUnlock()
 		cineMutex.Lock()
 
 		// Make sure that it wasn't changed while we were waiting for the lock
@@ -93,9 +96,9 @@ func CINEFetchDicomNames(Zip, Series string) ([]string, error) {
 			}
 		}
 		cineMutex.Unlock()
+		cineMutex.RLock()
 	}
 
-	cineMutex.RLock()
 	defer cineMutex.RUnlock()
 
 	key := cineKey{Zip: Zip, Series: Series}
