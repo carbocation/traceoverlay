@@ -15,12 +15,10 @@ import (
 var cineMutex *sync.RWMutex = &sync.RWMutex{}
 var cineManifestPath string
 var cineBulkPath string
-var cineLookup = make(map[cineKey][]cineValue)
+var cineLookup = make(map[cineZip]map[cineSeriesID][]cineValue)
 
-type cineKey struct {
-	Zip    string
-	Series string
-}
+type cineZip string
+type cineSeriesID string
 
 type cineValue struct {
 	Dicom          string
@@ -28,15 +26,20 @@ type cineValue struct {
 }
 
 const (
-	CineColZip           = "zip_file"
-	CineColSeries        = "series"
-	CineColDicom         = "dicom_file"
+	CineColSeries = "series"
+	CineColZip    = "zip_file"
+	CineColDicom  = "dicom_file"
+)
+
+var (
 	CineColInstancNumber = "instance_number"
 )
 
 func init() {
 	flag.StringVar(&cineManifestPath, "cinemanifest", "", "If set, should be a manifest containing images that can be stitched together into a CINE")
 	flag.StringVar(&cineBulkPath, "cinebulkpath", "", "If set, should be a path (likely Google Storage) where UK Biobank-style Zip files reside")
+	flag.StringVar(&CineColInstancNumber, "cine_sequence_column_name", "instance_number", "If cinemanifest is provided, this value represents the name of the column that indicates the order of the images with an increasing number.")
+	// flag.StringVar(&CineColSeries, "cine_series", "series", "If cinemanifest is provided, this value represents the name of the column that indicates the series grouping.")
 }
 
 func initializeCINEManifest() error {
@@ -66,7 +69,8 @@ func initializeCINEManifest() error {
 			continue
 		}
 
-		key := cineKey{Zip: line[head[CineColZip]], Series: line[head[CineColSeries]]}
+		zipKey := cineZip(line[head[CineColZip]])
+		seriesKey := cineSeriesID(line[head[CineColSeries]])
 
 		intInstanceNumber, err := strconv.Atoi(line[head[CineColInstancNumber]])
 		if err != nil {
@@ -75,7 +79,16 @@ func initializeCINEManifest() error {
 		}
 		value := cineValue{Dicom: line[head[CineColDicom]], InstanceNumber: intInstanceNumber}
 
-		cineLookup[key] = append(cineLookup[key], value)
+		zipMap, exists := cineLookup[zipKey]
+		seriesList := zipMap[seriesKey]
+		seriesList = append(seriesList, value)
+
+		if !exists {
+			zipMap = make(map[cineSeriesID][]cineValue)
+		}
+
+		zipMap[seriesKey] = seriesList
+		cineLookup[zipKey] = zipMap
 	}
 
 	return nil
@@ -101,8 +114,47 @@ func CINEFetchDicomNames(Zip, Series string) ([]string, error) {
 
 	defer cineMutex.RUnlock()
 
-	key := cineKey{Zip: Zip, Series: Series}
-	value := cineLookup[key]
+	zipMap := cineLookup[cineZip(Zip)]
+	value := zipMap[cineSeriesID(Series)]
+
+	sort.Slice(value, func(i, j int) bool { return value[i].InstanceNumber < value[j].InstanceNumber })
+
+	out := make([]string, 0, len(value))
+
+	for _, dicom := range value {
+		out = append(out, dicom.Dicom)
+	}
+
+	return out, nil
+}
+
+func CINEFetchAllDicomNames(Zip string) ([]string, error) {
+
+	cineMutex.RLock()
+	if len(cineLookup) == 0 {
+		cineMutex.RUnlock()
+		cineMutex.Lock()
+
+		// Make sure that it wasn't changed while we were waiting for the lock
+		if len(cineLookup) == 0 {
+			if err := initializeCINEManifest(); err != nil {
+				cineMutex.Unlock()
+				return nil, err
+			}
+		}
+		cineMutex.Unlock()
+		cineMutex.RLock()
+	}
+
+	defer cineMutex.RUnlock()
+
+	value := make([]cineValue, 0)
+
+	zipMap := cineLookup[cineZip(Zip)]
+
+	for _, seriesDicoms := range zipMap {
+		value = append(value, seriesDicoms...)
+	}
 
 	sort.Slice(value, func(i, j int) bool { return value[i].InstanceNumber < value[j].InstanceNumber })
 

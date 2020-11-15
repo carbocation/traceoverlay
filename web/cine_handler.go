@@ -46,10 +46,24 @@ func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 		series = mux.Vars(r)["series"]
 	}
 
+	r.ParseForm()
+
+	showAll := false
+	if r.FormValue("all") != "" {
+		showAll = true
+	}
+
 	cineManifestPath = strings.TrimSuffix(cineManifestPath, "/")
 
-	// Find all dicoms with the same Zip and Series
-	dicomNames, err := CINEFetchDicomNames(zipFile, series)
+	var dicomNames []string
+	var err error
+	if showAll {
+		// Find all dicoms with the same Zip
+		dicomNames, err = CINEFetchAllDicomNames(zipFile)
+	} else {
+		// Find all dicoms with the same Zip and Series
+		dicomNames, err = CINEFetchDicomNames(zipFile, series)
+	}
 	if err != nil {
 		HTTPError(h, w, r, err)
 		return
