@@ -24,7 +24,9 @@
 {{end}}
 
 {{define "page"}}
-<span>Project: <a href="/listproject">{{$.Data.Project}}</a>.Index: {{$.Data.ManifestIndex}}. Zip: {{$.Data.ManifestEntry.Zip}}. Dicom: {{$.Data.ManifestEntry.Dicom}}</span>
+<span>Project: <a href="/listproject">{{$.Data.Project}}</a>. </span>
+<span><a href="/traceoverlay/{{add 1 $.Data.ManifestIndex}}">[Skip] </a> </span>
+<span>{{$.Data.ManifestIndex}}. Zip: {{$.Data.ManifestEntry.Zip}}. Dicom: {{$.Data.ManifestEntry.Dicom}}</span>
 <span><a target="cine" href="/traceoverlay/cine/{{$.Data.ManifestEntry.Zip}}/{{$.Data.ManifestEntry.Series}}" onclick='event.preventDefault();window.open("/traceoverlay/cine/{{$.Data.ManifestEntry.Zip}}/{{$.Data.ManifestEntry.Series}}", "cine", "height=400,width=400");'>CINE</a></span>
 <span><a target="cine" href="/traceoverlay/cine/{{$.Data.ManifestEntry.Zip}}/{{$.Data.ManifestEntry.Series}}" onclick='event.preventDefault();window.open("/traceoverlay/cine/{{$.Data.ManifestEntry.Zip}}/{{$.Data.ManifestEntry.Series}}?all=true", "cine", "height=400,width=400");'>CINE-stack</a></span>
 <br />
