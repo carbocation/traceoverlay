@@ -22,6 +22,7 @@ type cineSeriesID string
 
 type cineValue struct {
 	Dicom          string
+	Series         cineSeriesID
 	InstanceNumber int
 }
 
@@ -77,7 +78,7 @@ func initializeCINEManifest() error {
 			// Ignore the error
 			intInstanceNumber = 0
 		}
-		value := cineValue{Dicom: line[head[CineColDicom]], InstanceNumber: intInstanceNumber}
+		value := cineValue{Dicom: line[head[CineColDicom]], InstanceNumber: intInstanceNumber, Series: seriesKey}
 
 		zipMap, exists := cineLookup[zipKey]
 		seriesList := zipMap[seriesKey]
@@ -128,7 +129,9 @@ func CINEFetchDicomNames(Zip, Series string) ([]string, error) {
 	return out, nil
 }
 
-func CINEFetchAllDicomNames(Zip string) ([]string, error) {
+// CINEFetchAllDicomNames yields the ordered list of DICOM names, and the
+// ordered list of matching series names
+func CINEFetchAllDicomNames(Zip string) ([]string, []string, error) {
 
 	cineMutex.RLock()
 	if len(cineLookup) == 0 {
@@ -139,7 +142,7 @@ func CINEFetchAllDicomNames(Zip string) ([]string, error) {
 		if len(cineLookup) == 0 {
 			if err := initializeCINEManifest(); err != nil {
 				cineMutex.Unlock()
-				return nil, err
+				return nil, nil, err
 			}
 		}
 		cineMutex.Unlock()
@@ -159,10 +162,12 @@ func CINEFetchAllDicomNames(Zip string) ([]string, error) {
 	sort.Slice(value, func(i, j int) bool { return value[i].InstanceNumber < value[j].InstanceNumber })
 
 	out := make([]string, 0, len(value))
+	outSeries := make([]string, 0, len(value))
 
 	for _, dicom := range value {
 		out = append(out, dicom.Dicom)
+		outSeries = append(outSeries, string(dicom.Series))
 	}
 
-	return out, nil
+	return out, outSeries, nil
 }
