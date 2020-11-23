@@ -53,6 +53,13 @@ func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 		showAll = true
 	}
 
+	gridColumns := 5
+	if cols := r.FormValue("cols"); cols != "" {
+		if intval, err := strconv.Atoi(cols); err == nil {
+			gridColumns = intval
+		}
+	}
+
 	cineManifestPath = strings.TrimSuffix(cineManifestPath, "/")
 
 	var dicomNames []string
@@ -85,7 +92,7 @@ func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 	// Total hack to get the SAX images to display as a grid instead of
 	// sequentially
 	if showAll {
-		newDicomNames, newImageMap, err := bulkprocess.ImageGrid(dicomNames, imageMap, series, seriesAlignment, 50, 4)
+		newDicomNames, newImageMap, err := bulkprocess.ImageGrid(dicomNames, imageMap, series, seriesAlignment, 50, gridColumns)
 		if err != nil {
 			HTTPError(h, w, r, fmt.Errorf("%s:%s: %v", zipFile, series, err))
 			return
@@ -102,6 +109,9 @@ func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 		HTTPError(h, w, r, fmt.Errorf("%s:%s: %v", zipFile, series, err))
 		return
 	}
+
+	// Set our content type
+	w.Header().Set("Content-Type", "image/gif")
 
 	// Send the GIF over the wire
 	if err := gif.EncodeAll(w, outGIF); err != nil {
