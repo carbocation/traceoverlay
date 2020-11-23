@@ -174,25 +174,27 @@ func ImageGrid(dicomNames []string, imageMap map[string]image.Image, series stri
 
 				// Highlight the active pane
 				if len(seriesAlignment) > imageID && seriesAlignment[imageID] == series {
+					borderColor := color.RGBA{R: 128, G: 128, B: 128, A: 255}
+
 					// Top
 					innerRect := drawRect
 					innerRect.Max.Y = innerRect.Min.Y + 2
-					draw.Draw(thisImg, innerRect, &image.Uniform{color.White}, image.ZP, draw.Src)
+					draw.Draw(thisImg, innerRect, &image.Uniform{borderColor}, image.ZP, draw.Src)
 
 					// Bottom
 					innerRect = drawRect
 					innerRect.Min.Y = innerRect.Max.Y - 2
-					draw.Draw(thisImg, innerRect, &image.Uniform{color.White}, image.ZP, draw.Src)
+					draw.Draw(thisImg, innerRect, &image.Uniform{borderColor}, image.ZP, draw.Src)
 
 					// Left
 					innerRect = drawRect
 					innerRect.Max.X = innerRect.Min.X + 2
-					draw.Draw(thisImg, innerRect, &image.Uniform{color.White}, image.ZP, draw.Src)
+					draw.Draw(thisImg, innerRect, &image.Uniform{borderColor}, image.ZP, draw.Src)
 
 					// Right
 					innerRect = drawRect
 					innerRect.Min.X = innerRect.Max.X - 2
-					draw.Draw(thisImg, innerRect, &image.Uniform{color.White}, image.ZP, draw.Src)
+					draw.Draw(thisImg, innerRect, &image.Uniform{borderColor}, image.ZP, draw.Src)
 				}
 
 				seriesCounter++
