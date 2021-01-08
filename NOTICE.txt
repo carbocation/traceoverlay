@@ -1,0 +1,16 @@
+Notice of Third Party Code Dependencies
+
+traceoverlay is distributed, in part, under and subject to the provisions of respective licenses for the following dependencies: 
+
+1. jquery
+Copyright (c) OpenJS Foundation and other contributors. 
+All rights reserved.
+https://jquery.org/license/
+https://github.com/jquery/jquery/blob/master/LICENSE.txt
+
+
+2. bootstrap
+Copyright (c) 2011-2021 Twitter, Inc.
+Copyright (c) 2011-2021 The Bootstrap Authors.
+All rights reserved. 
+https://github.com/twbs/bootstrap/blob/main/LICENSE
