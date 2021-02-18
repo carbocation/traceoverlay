@@ -108,7 +108,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Decode into something visually acceptable
-			humanImg, err := h.Config.Labels.DecodeImageFromImageSegment(img)
+			humanImg, err := h.Config.Labels.DecodeImageFromImageSegment(img, true)
 			if err != nil {
 				HTTPError(h, w, r, err)
 				return
@@ -231,7 +231,7 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 
 	// Decode the ID-encoding we just created into a human-interpretable set of
 	// colors.
-	decoded, err := h.Config.Labels.DecodeImageFromImageSegment(encoded)
+	decoded, err := h.Config.Labels.DecodeImageFromImageSegment(encoded, true)
 	if err != nil {
 		HTTPError(h, w, r, err)
 		return

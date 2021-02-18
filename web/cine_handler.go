@@ -104,7 +104,7 @@ func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create the GIF
-	outGIF, err := bulkprocess.MakeOneGIFFromMap(dicomNames, imageMap, 2)
+	outGIF, err := bulkprocess.MakeOneGIFFromMap(dicomNames, imageMap, 2, false)
 	if err != nil {
 		HTTPError(h, w, r, fmt.Errorf("%s:%s: %v", zipFile, series, err))
 		return
