@@ -35,7 +35,7 @@ func router(config *Global) (http.Handler, error) {
 		return nil, err
 	}
 	staticHandler := http.StripPrefix(h.Assets(), http.FileServer(http.FS(assetFilesystem)))
-	GET.PathPrefix(h.Assets()).Handler(middleware.MaxAgeHandler(60*60*24*364, staticHandler)) //http.Dir(fmt.Sprintf(`%s/templates/static/`, h.Folder()))))))
+	GET.PathPrefix(h.Assets()).Handler(middleware.MaxAgeHandler(60*60*24*364, staticHandler))
 
 	standard := alice.New(
 		// Log all requests to STDOUT
