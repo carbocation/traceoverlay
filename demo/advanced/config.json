@@ -1,7 +1,7 @@
 {
-    "manifest": "/mnt/storage/projects/traceoverlay/demo/advanced/manifest.tsv",
-    "label_path": "/mnt/storage/projects/traceoverlay/demo/advanced/annotations",
-    "image_path": "/mnt/storage/projects/traceoverlay/demo/raw",
+    "manifest": "advanced/manifest.tsv",
+    "label_path": "advanced/annotations",
+    "image_path": "raw",
     "image_suffix": "",
     "preparsed": true,
     "port": 9019,

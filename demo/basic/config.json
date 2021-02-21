@@ -1,6 +1,6 @@
 {
-    "label_path": "/mnt/storage/projects/traceoverlay/demo/basic/annotations",
-    "image_path": "/mnt/storage/projects/traceoverlay/demo/raw",
+    "label_path": "basic/annotations",
+    "image_path": "raw",
     "image_suffix": "",
     "preparsed": true,
     "port": 9019,

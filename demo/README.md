@@ -1,10 +1,14 @@
 # Demo: annotation with TraceOverlay
 
 To run: 
-1. Change the absolute paths in `advanced/config.json` or `basic/config.json` to
-   reference this folder on your disk (`pwd -P` will show you)
 1. Navigate to the `web` directory of this repository
-1. `go build -o traceoverlay.linux *.go && ./traceoverlay.linux -config ../demo/config.json`
+1. `go build -o traceoverlay *.go cp traceoverlay ~/go/bin/` to produce a
+   traceoverlay binary that should be available in your `$PATH`, assuming go is
+   installed in typical fashion.
+1. Change the paths in `advanced/config.json` or `basic/config.json` to
+   reference this folder on your disk via absolute path (`pwd -P` will show
+   you). Alternatively, navigate to this ./demo/ folder and run the program from
+   here; the relative paths will then be correct.
 
 Then in your browser, visit: http://localhost:9019
 
