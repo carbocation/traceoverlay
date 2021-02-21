@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"io/fs"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -9,7 +9,7 @@ import (
 	"github.com/justinas/alice"
 )
 
-func router(config *Global) http.Handler {
+func router(config *Global) (http.Handler, error) {
 	router := mux.NewRouter()
 	POST := router.Methods("POST").Subrouter()
 	GET := router.Methods("GET", "HEAD").Subrouter()
@@ -30,15 +30,17 @@ func router(config *Global) http.Handler {
 	POST.HandleFunc("/traceoverlay/{manifest_index}", h.TraceOverlayPost)
 
 	// Static assets
-	GET.PathPrefix(h.Assets()).Handler(
-		middleware.MaxAgeHandler(60*60*24*364,
-			http.StripPrefix(h.Assets(),
-				http.FileServer(http.Dir(fmt.Sprintf(`%s/templates/static/`, h.Folder()))))))
+	assetFilesystem, err := fs.Sub(embeddedTemplates, "templates/static")
+	if err != nil {
+		return nil, err
+	}
+	staticHandler := http.StripPrefix(h.Assets(), http.FileServer(http.FS(assetFilesystem)))
+	GET.PathPrefix(h.Assets()).Handler(middleware.MaxAgeHandler(60*60*24*364, staticHandler)) //http.Dir(fmt.Sprintf(`%s/templates/static/`, h.Folder()))))))
 
 	standard := alice.New(
 		// Log all requests to STDOUT
 		middleware.GorillaLog(),
 	)
 
-	return standard.Then(router)
+	return standard.Then(router), nil
 }

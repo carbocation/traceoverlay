@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -81,6 +82,7 @@ func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error)
 
 	if manifestPath == "" {
 		// No manifest - just read the image directory contents
+		log.Println(imagePath)
 		files, err := ioutil.ReadDir(filepath.Join(imagePath))
 		if os.IsNotExist(err) {
 			// Not a problem
