@@ -70,7 +70,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 	manifestEntry := h.Global.Manifest()[manifestIndex]
 	var im image.Image
 
-	if strings.HasPrefix(h.Global.Config.ImagePath, "gs://") {
+	if strings.HasPrefix(h.Global.Config.ImagePath, "gs://") && !h.Global.Config.PreParsed {
 		// Google Storage
 		client, err := getGSClient()
 		if err != nil {
@@ -81,6 +81,13 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 			manifestEntry.Dicom,
 			true,
 			client)
+	} else if strings.HasPrefix(h.Global.Config.ImagePath, "gs://") && h.Global.Config.PreParsed {
+		client, err := getGSClient()
+		if err != nil {
+			HTTPError(h, w, r, err)
+			return
+		}
+		im, err = bulkprocess.MaybeExtractImageFromGoogleStorage(fmt.Sprintf("%s/%s", h.Global.Config.ImagePath, manifestEntry.Dicom), client)
 	} else if h.Global.Config.PreParsed && !strings.HasPrefix(h.Global.Config.ImagePath, "gs://") {
 		im, err = bulkprocess.ExtractImageFromLocalFile(manifestEntry.Dicom, h.Global.Config.ImageSuffix, h.Global.Config.ImagePath)
 	} else {

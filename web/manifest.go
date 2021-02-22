@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/csv"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/carbocation/genomisc/ukbb/bulkprocess"
 )
 
 type Manifest struct {
@@ -82,22 +83,36 @@ func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error)
 
 	if manifestPath == "" {
 		// No manifest - just read the image directory contents
-		log.Println(imagePath)
-		files, err := ioutil.ReadDir(filepath.Join(imagePath))
-		if os.IsNotExist(err) {
-			// Not a problem
-		} else if err != nil {
-			return nil, err
-		}
 
 		recs = make([][]string, 0)
 		recs = append(recs, []string{"dicom_file"})
 
-		for _, f := range files {
-			if f.IsDir() {
-				continue
+		if strings.HasPrefix(imagePath, "gs://") {
+			client, err := getGSClient()
+			if err != nil {
+				return nil, err
 			}
-			recs = append(recs, []string{f.Name()})
+			filenames, err := bulkprocess.ListFromGoogleStorage(imagePath, client)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, filename := range filenames {
+				recs = append(recs, []string{filename})
+			}
+		} else {
+			files, err := ioutil.ReadDir(filepath.Join(imagePath))
+			if os.IsNotExist(err) {
+				// Not a problem
+			} else if err != nil {
+				return nil, err
+			}
+			for _, f := range files {
+				if f.IsDir() {
+					continue
+				}
+				recs = append(recs, []string{f.Name()})
+			}
 		}
 
 	} else {
