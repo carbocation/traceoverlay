@@ -130,7 +130,13 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 
 	// Convert that image to a PNG and base64 encode it so we can show it raw
 	var imBuff bytes.Buffer
-	png.Encode(&imBuff, im)
+	imBoundsX := 0
+	imBoundsY := 0
+	if im != nil {
+		png.Encode(&imBuff, im)
+		imBoundsX = im.Bounds().Dx()
+		imBoundsY = im.Bounds().Dy()
+	}
 	encodedString := base64.StdEncoding.EncodeToString(imBuff.Bytes())
 
 	output := struct {
@@ -150,8 +156,8 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		manifestEntry,
 		manifestIndex,
 		strings.NewReplacer("\n", "", "\r", "").Replace(encodedString),
-		im.Bounds().Dx(),
-		im.Bounds().Dy(),
+		imBoundsX,
+		imBoundsY,
 		manifestEntry.HasOverlayFromProject,
 		strings.NewReplacer("\n", "", "\r", "").Replace(encodedOverlayString),
 		h.Config.DefaultBrush,
