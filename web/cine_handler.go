@@ -13,6 +13,17 @@ import (
 
 // For DICOM-specific needs
 
+func manifestMap(h *handler) map[string]struct{} {
+	// Ensure that we only
+	annotationManifest := h.Manifest()
+	annotationManifestMap := make(map[string]struct{})
+	for _, v := range annotationManifest {
+		annotationManifestMap[v.Zip] = struct{}{}
+	}
+
+	return annotationManifestMap
+}
+
 func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 	// Fetch the desired images from the zip file and series. Either we can
 	// reach into the primary manifest based on manifest_index, or if zip and
@@ -65,12 +76,15 @@ func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 	var dicomNames []string
 	var seriesAlignment []string
 	var err error
+
+	manMap := manifestMap(h)
+
 	if showAll {
 		// Find all dicoms with the same Zip
-		dicomNames, seriesAlignment, err = CINEFetchAllDicomNames(zipFile)
+		dicomNames, seriesAlignment, err = CINEFetchAllDicomNames(manMap, zipFile)
 	} else {
 		// Find all dicoms with the same Zip and Series
-		dicomNames, err = CINEFetchDicomNames(zipFile, series)
+		dicomNames, err = CINEFetchDicomNames(manMap, zipFile, series)
 	}
 	if err != nil {
 		HTTPError(h, w, r, err)

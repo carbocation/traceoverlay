@@ -43,7 +43,7 @@ func init() {
 	// flag.StringVar(&CineColSeries, "cine_series", "series", "If cinemanifest is provided, this value represents the name of the column that indicates the series grouping.")
 }
 
-func initializeCINEManifest() error {
+func initializeCINEManifest(manMap map[string]struct{}) error {
 	cineManifestFile, err := os.Open(cineManifestPath)
 	if err != nil {
 		return err
@@ -73,6 +73,12 @@ func initializeCINEManifest() error {
 		zipKey := cineZip(line[head[CineColZip]])
 		seriesKey := cineSeriesID(line[head[CineColSeries]])
 
+		// To save memory, don't add a sample to the CINE manifest if they are
+		// not in the manifest of samples to annotate.
+		if _, exists := manMap[line[head[CineColZip]]]; !exists {
+			continue
+		}
+
 		intInstanceNumber, err := strconv.Atoi(line[head[CineColInstancNumber]])
 		if err != nil {
 			// Ignore the error
@@ -95,7 +101,7 @@ func initializeCINEManifest() error {
 	return nil
 }
 
-func CINEFetchDicomNames(Zip, Series string) ([]string, error) {
+func CINEFetchDicomNames(manMap map[string]struct{}, Zip, Series string) ([]string, error) {
 
 	cineMutex.RLock()
 	if len(cineLookup) == 0 {
@@ -104,7 +110,7 @@ func CINEFetchDicomNames(Zip, Series string) ([]string, error) {
 
 		// Make sure that it wasn't changed while we were waiting for the lock
 		if len(cineLookup) == 0 {
-			if err := initializeCINEManifest(); err != nil {
+			if err := initializeCINEManifest(manMap); err != nil {
 				cineMutex.Unlock()
 				return nil, err
 			}
@@ -131,7 +137,7 @@ func CINEFetchDicomNames(Zip, Series string) ([]string, error) {
 
 // CINEFetchAllDicomNames yields the ordered list of DICOM names, and the
 // ordered list of matching series names
-func CINEFetchAllDicomNames(Zip string) ([]string, []string, error) {
+func CINEFetchAllDicomNames(manMap map[string]struct{}, Zip string) ([]string, []string, error) {
 
 	cineMutex.RLock()
 	if len(cineLookup) == 0 {
@@ -140,7 +146,7 @@ func CINEFetchAllDicomNames(Zip string) ([]string, []string, error) {
 
 		// Make sure that it wasn't changed while we were waiting for the lock
 		if len(cineLookup) == 0 {
-			if err := initializeCINEManifest(); err != nil {
+			if err := initializeCINEManifest(manMap); err != nil {
 				cineMutex.Unlock()
 				return nil, nil, err
 			}
