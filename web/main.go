@@ -68,6 +68,12 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	// If the command line port is the default port number AND the config file
+	// port is set, use the config file. Otherwise, use the command line port.
+	if config.Port != 0 && *port == 9019 {
+		port = &config.Port
+	}
+
 	if !config.Labels.Valid() {
 		config.Labels = make(overlay.LabelMap)
 	}
