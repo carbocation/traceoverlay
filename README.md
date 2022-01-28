@@ -6,7 +6,7 @@
 
 TraceOverlay is a tool for labeling pixels within an image with semantically
 meaningful labels (semantic segmentation). The tool was written to create
-training data for aortic segmentation in the folling manuscript:
+training data for aortic segmentation in the following manuscript:
 
 > Pirruccello, J.P., Chaffin, M.D., Chou, E.L. *et al*. Deep learning enables genetic analysis of the human thoracic aorta. *Nat Genet* 54, 40–51 (2022). https://doi.org/10.1038/s41588-021-00962-4
 
