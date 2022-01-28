@@ -41,3 +41,8 @@ https://www.pexels.com/photo/christmas-cookies-on-tray-3370704/
 ## Output
 Each traced overlay is output as the input filename with `.mask.png` appended.
 
+## Screenshots
+
+![](2022-01-28-00-13-54.png)
+
+![](2022-01-28-00-13-27.png)
