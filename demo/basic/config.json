@@ -1,6 +1,6 @@
 {
-    "label_path": "basic/annotations",
-    "image_path": "raw",
+    "label_path": "demo/basic/annotations",
+    "image_path": "demo/raw",
     "image_suffix": "",
     "preparsed": true,
     "port": 9019,

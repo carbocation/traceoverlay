@@ -1,27 +1,43 @@
 # TraceOverlay
 
-`go get github.com/carbocation/traceoverlay/web`
+`go get github.com/carbocation/traceoverlay`
 
-## Running:
-1. Build
-1. Pass the folder name for your current overlay
-1. Pass a (subsetted) manifest file
-
+## Installation:
 ```sh
-# Build:
-go build -o to.linux *.go
-
-# Then run:
-./to.linux \
-  -manifest /tmp/trace-test/trace-test.tsv \
-  -project teapot
+cd cmd/traceoverlay
+go install
+cd ../../
 ```
 
-### Manifest
-Since every entry in the manifest will be listed, you should aggressively prune the list of entries you want to deal with before launching traceoverlay.
+## Demos
 
-### Project
-A folder with this name will be created in the same path where you are running traceoverlay. The purpose of "projects" is to allow you to trace different structures with different projects: e.g., the `rv` with one project, the `lv` with another, `aorta`, etc. TODO: Need to consider whether this is the optimal approach. If we end up using this tool frequently, then knowing which files have been annotated *for each project* may be important, but currently that is not possible since only one project at a time is consumed.
+Demo config files have relative paths that will only work if run from this
+folder (the same folder as this README).
+### Running the basic demo:
+
+```sh
+traceoverlay -config demo/basic/config.json
+```
+
+Then navigate in your browser to http://localhost:9019
+
+### Running the advanced demo:
+```sh
+traceoverlay -config demo/advanced/config.json
+```
+
+Then navigate in your browser to http://localhost:9019
+
+The advanced demo uses a `manifest.tsv` file to specify which images should be
+listed (rather than listing all images in a folder).
+
+### Demo image licensing
+
+Note: images are used with permission from the "[Pexels
+License](https://www.pexels.com/photo-license/)" from
+https://www.pexels.com/photo/christmas-cookies-on-tray-3370704/
+
 
 ## Output
-Each traced overlay is output as `zipfilename_dicomname.png`. They are PNGs because go's BMP writer made these all black, even though they are natively transparent BMPs...
+Each traced overlay is output as the input filename with `.mask.png` appended.
+

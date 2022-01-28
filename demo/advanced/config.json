@@ -1,7 +1,7 @@
 {
-    "manifest": "advanced/manifest.tsv",
-    "label_path": "advanced/annotations",
-    "image_path": "raw",
+    "manifest": "demo/advanced/manifest.tsv",
+    "label_path": "demo/advanced/annotations",
+    "image_path": "demo/raw",
     "image_suffix": "",
     "preparsed": true,
     "port": 9019,
