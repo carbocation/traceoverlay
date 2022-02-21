@@ -115,9 +115,9 @@ func main() {
 
 	global = &Global{
 		Site:      "TraceOverlay",
-		Company:   "Carbocation Corporation",
-		Email:     "james@carbocation.com",
-		SnailMail: "4 Longfellow Pl Apt 2901, Boston MA 02114",
+		Company:   "James Pirruccello and The General Hospital Corporation",
+		Email:     "jpirruccello@mgh.harvard.edu",
+		SnailMail: "55 Fruit Street, Boston MA 02114",
 		log:       log.New(os.Stderr, log.Prefix(), log.Ldate|log.Ltime),
 		db:        nil,
 
