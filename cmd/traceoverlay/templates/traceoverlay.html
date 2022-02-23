@@ -1,5 +1,10 @@
 {{define "title"}}{{$.Data.Project}}{{end}}
 {{define "headinsert"}}
+<script>
+    {{if ne 0 $.Data.PreviewAlpha}}
+    var previewAlpha = {{$.Data.PreviewAlpha}};
+    {{end}}
+</script>
 <style>
     .traceCanvas {
         min-height: 600px;

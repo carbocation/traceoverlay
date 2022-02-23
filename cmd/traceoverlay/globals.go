@@ -18,6 +18,7 @@ type Global struct {
 
 	Project      string
 	ManifestPath string
+	PreviewAlpha int
 
 	m        sync.RWMutex
 	manifest []Manifest

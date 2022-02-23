@@ -54,6 +54,7 @@ func main() {
 
 	jsonConfig := flag.String("config", "", "Path to JSON file with configuration.")
 	port := flag.Int("port", 9019, "Port for HTTP server")
+	previewAlpha := flag.Int("alpha", 0, "Alpha value for preview images from 1 (min) to 255 (max). Default is 160 if left at 0 or unset.")
 	flag.Parse()
 
 	if *jsonConfig == "" {
@@ -124,6 +125,7 @@ func main() {
 		Project:      filepath.Base(config.LabelPath),
 		ManifestPath: config.ManifestPath,
 		manifest:     manifestLines,
+		PreviewAlpha: *previewAlpha,
 
 		Config: config,
 	}

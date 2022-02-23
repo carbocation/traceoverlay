@@ -150,6 +150,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		EncodedOverlayImage string
 		DefaultBrush        string
 		BrushSize           int
+		PreviewAlpha        int
 		Labels              []overlay.Label
 	}{
 		h.Global.Project,
@@ -162,6 +163,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		strings.NewReplacer("\n", "", "\r", "").Replace(encodedOverlayString),
 		h.Config.DefaultBrush,
 		h.Config.BrushSize,
+		h.PreviewAlpha,
 		h.Config.Labels.Sorted(),
 	}
 

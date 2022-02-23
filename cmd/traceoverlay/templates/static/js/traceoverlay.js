@@ -11,8 +11,8 @@ context.msImageSmoothingEnabled = false;
 // context.fillStyle = "#ff0000"; //"rgba(255, 0, 0, 1)";
 // context.fillStyle = "#ff0000";
 // context.strokeStyle = "#ff0000";
-var previewAlpha = 160;
-var saveAlpha = 255;
+var previewAlpha = previewAlpha || 160;
+var saveAlpha = saveAlpha || 255;
 
 // Brush variables
 var brush = "exact";
