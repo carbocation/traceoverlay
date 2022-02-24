@@ -21,6 +21,7 @@ func router(config *Global) (http.Handler, error) {
 	GET.HandleFunc("/{template:(?:about|privacy|TOS|DMCA)}", h.TemplateOnly)
 	GET.HandleFunc("/traceoverlay/{manifest_index}", h.TraceOverlay).Name("traceoverlay")
 	GET.HandleFunc("/traceoverlay/cine/{zip}/{series}", h.TraceOverlayCINE).Name("traceoverlay_cine")
+	GET.HandleFunc("/traceoverlay/cinehtml/{zip}/{series}", h.TraceOverlayCINEHTML).Name("traceoverlay_cinehtml")
 	GET.HandleFunc("/listproject", h.ListProject).Name("listproject")
 
 	//

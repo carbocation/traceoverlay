@@ -24,6 +24,21 @@ func manifestMap(h *handler) map[string]struct{} {
 	return annotationManifestMap
 }
 
+// TraceOverlayCINEHTML provides an HTML wrapper to fetch the TraceOverlayCINE.
+// This can be nice because it allows you to use CSS to change the display of
+// the image. In this case, we make the image fill the height or width of the
+// viewport (whichever is smaller).
+func (h *handler) TraceOverlayCINEHTML(w http.ResponseWriter, r *http.Request) {
+
+	output := struct {
+		ImageLink string
+	}{
+		fmt.Sprintf("/traceoverlay/cine/%s/%s", mux.Vars(r)["zip"], mux.Vars(r)["series"]),
+	}
+
+	Render(h, w, r, "CINE", "cine.html", output, nil)
+}
+
 func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 	// Fetch the desired images from the zip file and series. Either we can
 	// reach into the primary manifest based on manifest_index, or if zip and
