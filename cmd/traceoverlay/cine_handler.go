@@ -30,10 +30,11 @@ func manifestMap(h *handler) map[string]struct{} {
 // viewport (whichever is smaller).
 func (h *handler) TraceOverlayCINEHTML(w http.ResponseWriter, r *http.Request) {
 
+	// TODO: proper URL query string construction
 	output := struct {
 		ImageLink string
 	}{
-		fmt.Sprintf("/traceoverlay/cine/%s/%s", mux.Vars(r)["zip"], mux.Vars(r)["series"]),
+		fmt.Sprintf("/traceoverlay/cine/%s/%s?all=%s", mux.Vars(r)["zip"], mux.Vars(r)["series"], r.FormValue("all")),
 	}
 
 	Render(h, w, r, "CINE", "cine.html", output, nil)
