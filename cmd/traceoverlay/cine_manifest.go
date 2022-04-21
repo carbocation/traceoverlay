@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 	"sort"
@@ -67,6 +68,11 @@ func initializeCINEManifest(manMap map[string]struct{}) error {
 			for col, label := range line {
 				head[label] = col
 			}
+
+			if len(head) < 4 {
+				return fmt.Errorf("CINE manifest must be tab-delimited with at least 4 columns: series, zip_file, dicom_file, instance_number")
+			}
+
 			continue
 		}
 
