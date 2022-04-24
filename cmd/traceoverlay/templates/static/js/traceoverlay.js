@@ -347,6 +347,10 @@ canvas.addEventListener('touchstart', function (e) {
     return false;
 }, false);
 
+function skipToNext() {
+    var nextHREF = document.getElementById("skiplink").href
+    window.location = nextHREF
+}
 
 function saveCanvas() {
     redrawAll();
@@ -526,6 +530,9 @@ $(document).on("keydown", function(event){
     } else if(event.key == "n") {
         var hit = true;
         saveCanvas();
+    } else if(event.key == "v") {
+        var hit = true;
+        skipToNext();
     } else if(event.key == "z") {
         var hit = true;
         setBrushSize(brushSize - 1);
