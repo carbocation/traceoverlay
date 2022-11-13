@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strconv"
 	"sync"
+
+	"github.com/carbocation/genomisc/cdf16match"
 )
 
 // For DICOM-specific needs
@@ -35,12 +37,16 @@ const (
 
 var (
 	CineColInstancNumber = "instance_number"
+	CinePixelScaling     = "official"
+	CinePixelCDFMatch    = ""
 )
 
 func init() {
 	flag.StringVar(&cineManifestPath, "cinemanifest", "", "If set, should be a manifest containing images that can be stitched together into a CINE")
 	flag.StringVar(&cineBulkPath, "cinebulkpath", "", "If set, should be a path (likely Google Storage) where UK Biobank-style Zip files reside")
 	flag.StringVar(&CineColInstancNumber, "cine_sequence_column_name", "instance_number", "If cinemanifest is provided, this value represents the name of the column that indicates the order of the images with an increasing number.")
+	flag.StringVar(&CinePixelScaling, "cine_pixel_scale", "official", "When displaying cines, apply this scaling. Options: raw (no scaling), pythonic (range from max to min observed pixels), official (use the recommended windowing from the DICOM). Default: official.")
+	flag.StringVar(&CinePixelCDFMatch, "cine_pixel_cdf_match", "", fmt.Sprintf("After applying --cine_pixel_scale, apply a CDF Match algorithm? If not empty, options are: %s", cdf16match.PrecomputedList()))
 	// flag.StringVar(&CineColSeries, "cine_series", "series", "If cinemanifest is provided, this value represents the name of the column that indicates the series grouping.")
 }
 

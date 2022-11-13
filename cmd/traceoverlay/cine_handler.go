@@ -113,7 +113,20 @@ func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 		HTTPError(h, w, r, err)
 		return
 	}
-	imageMap, err := bulkprocess.FetchNamedImagesFromZIP(cineBulkPath+"/"+zipFile, false, client, dicomNames)
+
+	opts := make([]func(*bulkprocess.ExtractDicomOptions), 0)
+	if CinePixelScaling == "raw" {
+		opts = append(opts, bulkprocess.OptWindowScalingRaw())
+	} else if CinePixelScaling == "pythonic" {
+		opts = append(opts, bulkprocess.OptWindowScalingPythonic())
+	} else if CinePixelScaling == "official" {
+		opts = append(opts, bulkprocess.OptWindowScalingOfficial())
+	}
+	if CinePixelCDFMatch != "" {
+		opts = append(opts, bulkprocess.OptCDFModelByName(CinePixelCDFMatch))
+	}
+
+	imageMap, err := bulkprocess.FetchNamedImagesFromZIP(cineBulkPath+"/"+zipFile, false, client, dicomNames, opts...)
 	if err != nil {
 		HTTPError(h, w, r, err)
 		return
