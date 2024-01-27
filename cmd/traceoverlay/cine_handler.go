@@ -125,6 +125,9 @@ func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 	if CinePixelCDFMatch != "" {
 		opts = append(opts, bulkprocess.OptCDFModelByName(CinePixelCDFMatch))
 	}
+	if CinePixelCDFMatchV2 != "" {
+		opts = append(opts, bulkprocess.OptCDFModelByNameV2(CinePixelCDFMatchV2))
+	}
 
 	imageMap, err := bulkprocess.FetchNamedImagesFromZIP(cineBulkPath+"/"+zipFile, false, client, dicomNames, opts...)
 	if err != nil {
