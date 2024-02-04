@@ -126,6 +126,32 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 			// png.Encode(&imBuff, img)
 			encodedOverlayString = base64.StdEncoding.EncodeToString(imBuff.Bytes())
 		}
+	} else if manifestEntry.HasAutomatedOverlay {
+		switch {
+		default:
+			pngPath := filepath.Join(global.AutomatedLabelPath, manifestEntry.OverlayFilename())
+			f, err := os.Open(pngPath)
+			if err != nil {
+				break
+			}
+
+			img, err := png.Decode(f)
+			if err != nil {
+				break
+			}
+
+			// Decode into something visually acceptable
+			humanImg, err := h.Config.Labels.DecodeImageFromImageSegment(img, true)
+			if err != nil {
+				HTTPError(h, w, r, err)
+				return
+			}
+
+			var imBuff bytes.Buffer
+			png.Encode(&imBuff, humanImg)
+			// png.Encode(&imBuff, img)
+			encodedOverlayString = base64.StdEncoding.EncodeToString(imBuff.Bytes())
+		}
 	}
 
 	// Convert that image to a PNG and base64 encode it so we can show it raw
@@ -159,7 +185,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		strings.NewReplacer("\n", "", "\r", "").Replace(encodedString),
 		imBoundsX,
 		imBoundsY,
-		manifestEntry.HasOverlayFromProject,
+		manifestEntry.HasOverlayFromProject || manifestEntry.HasAutomatedOverlay,
 		strings.NewReplacer("\n", "", "\r", "").Replace(encodedOverlayString),
 		h.Config.DefaultBrush,
 		h.Config.BrushSize,

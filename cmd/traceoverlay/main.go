@@ -52,9 +52,12 @@ func main() {
 	log.Println("Launched with arguments:")
 	log.Println(os.Args)
 
+	var automatedLabelPath string
+
 	jsonConfig := flag.String("config", "", "Path to JSON file with configuration.")
 	port := flag.Int("port", 9019, "Port for HTTP server")
 	previewAlpha := flag.Int("alpha", 0, "Alpha value for preview images from 1 (min) to 255 (max). Default is 160 if left at 0 or unset.")
+	flag.StringVar(&automatedLabelPath, "automated_labels", "", "Analogous to the label_path argument in the config file, but this will not count as completed. Therefore, this folder can be used to review automated labels or precomputed labels while only saving those that require modification. (Optional)")
 	flag.Parse()
 
 	if *jsonConfig == "" {
@@ -109,7 +112,7 @@ func main() {
 		config.LabelPath = newpath
 	}
 
-	manifestLines, err := ReadManifest(config.ManifestPath, config.LabelPath, config.ImagePath)
+	manifestLines, err := ReadManifest(config.ManifestPath, config.LabelPath, automatedLabelPath, config.ImagePath)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -127,7 +130,8 @@ func main() {
 		manifest:     manifestLines,
 		PreviewAlpha: *previewAlpha,
 
-		Config: config,
+		Config:             config,
+		AutomatedLabelPath: automatedLabelPath,
 	}
 
 	global.log.Println("Launching", global.Site)

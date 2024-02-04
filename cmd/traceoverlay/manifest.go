@@ -17,6 +17,7 @@ type Manifest struct {
 	Series                string
 	InstanceNumber        int
 	HasOverlayFromProject bool
+	HasAutomatedOverlay   bool
 }
 
 func (m Manifest) OverlayFilename() string {
@@ -63,7 +64,7 @@ func UpdateManifest() error {
 }
 
 // ReadManifest takes the path to a manifest file and extracts each line.
-func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error) {
+func ReadManifest(manifestPath, labelPath, automatedLabelPath, imagePath string) ([]Manifest, error) {
 	// First, look in the labelPath to see if there are any annotations.
 	files, err := ioutil.ReadDir(filepath.Join(labelPath))
 	if os.IsNotExist(err) {
@@ -77,6 +78,22 @@ func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error)
 			continue
 		}
 		overlaysExist[f.Name()] = struct{}{}
+	}
+
+	// Also look in the automatedLabelPath to see if there are any annotations
+	// in the automated folder.
+	files, err = ioutil.ReadDir(filepath.Join(automatedLabelPath))
+	if os.IsNotExist(err) {
+		// Not a problem
+	} else if err != nil {
+		return nil, err
+	}
+	automatedOverlaysExist := make(map[string]struct{})
+	for _, f := range files {
+		if f.IsDir() {
+			continue
+		}
+		automatedOverlaysExist[f.Name()] = struct{}{}
 	}
 
 	var recs [][]string
@@ -162,6 +179,7 @@ func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error)
 		}
 
 		_, hasOverlay := overlaysExist[overlayFilename(cols[header.Dicom])]
+		_, hasAutomatedOverlay := automatedOverlaysExist[overlayFilename(cols[header.Dicom])]
 
 		output = append(output, Manifest{
 			Zip:                   cols[header.Zip],
@@ -169,6 +187,7 @@ func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error)
 			Series:                cols[header.Series],
 			InstanceNumber:        intInstance,
 			HasOverlayFromProject: hasOverlay,
+			HasAutomatedOverlay:   hasAutomatedOverlay,
 		})
 	}
 
