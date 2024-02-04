@@ -172,41 +172,7 @@ func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error)
 		})
 	}
 
-	// Don't sort the manifest - use the manifest order as the sort order
-	// sort.Slice(output, generateManifestSorter(output))
+	// Don't sort the manifest - use the manifest line order as the sort order
 
 	return output, nil
-}
-
-// generateManifestSorter is a convenience function to help sort a list of
-// manifest objects
-func generateManifestSorter(output []Manifest) func(i, j int) bool {
-	return func(i, j int) bool {
-		// Need both conditions so that ties will proceed to the next check
-		if output[i].Zip < output[j].Zip {
-			return true
-		} else if output[i].Zip > output[j].Zip {
-			return false
-		}
-
-		if output[i].Series < output[j].Series {
-			return true
-		} else if output[i].Series > output[j].Series {
-			return false
-		}
-
-		if output[i].InstanceNumber < output[j].InstanceNumber {
-			return true
-		} else if output[i].InstanceNumber > output[j].InstanceNumber {
-			return false
-		}
-
-		if output[i].Dicom < output[j].Dicom {
-			return true
-		} else if output[i].Dicom > output[j].Dicom {
-			return false
-		}
-
-		return false
-	}
 }
