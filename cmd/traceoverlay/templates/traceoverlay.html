@@ -29,6 +29,7 @@
 {{end}}
 
 {{define "page"}}
+<span>{{if $.Data.HasOverlay}}✅{{else}}{{end}}</span>
 <span>Project: <a href="/listproject">{{$.Data.Project}}</a>. </span>
 <span><a id="skiplink" href="/traceoverlay/{{add 1 $.Data.ManifestIndex}}">[Skip] </a> </span>
 <span>{{$.Data.ManifestIndex}}. Zip: {{$.Data.ManifestEntry.Zip}}. Dicom: {{$.Data.ManifestEntry.Dicom}}</span>
