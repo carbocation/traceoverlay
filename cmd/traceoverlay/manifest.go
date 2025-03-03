@@ -18,6 +18,7 @@ type Manifest struct {
 	InstanceNumber        int
 	HasOverlayFromProject bool
 	HasAutomatedOverlay   bool
+	Metadata              map[string]string
 }
 
 func (m Manifest) OverlayFilename() string {
@@ -149,7 +150,8 @@ func ReadManifest(manifestPath, labelPath, automatedLabelPath, imagePath string)
 
 	output := make([]Manifest, 0, len(recs))
 
-	header := struct {
+	var headers []string
+	headerIndices := struct {
 		Zip            int
 		Dicom          int
 		Series         int
@@ -158,36 +160,50 @@ func ReadManifest(manifestPath, labelPath, automatedLabelPath, imagePath string)
 
 	for i, cols := range recs {
 		if i == 0 {
+			// Capture header row.
+			headers = cols
 			for j, col := range cols {
-				if col == "zip_file" {
-					header.Zip = j
-				} else if col == "dicom_file" {
-					header.Dicom = j
-				} else if col == "series" {
-					header.Series = j
-				} else if col == "instance_number" {
-					header.InstanceNumber = j
+				switch col {
+				case "zip_file":
+					headerIndices.Zip = j
+				case "dicom_file":
+					headerIndices.Dicom = j
+				case "series":
+					headerIndices.Series = j
+				case "instance_number":
+					headerIndices.InstanceNumber = j
 				}
 			}
 			continue
 		}
 
-		intInstance, err := strconv.Atoi(cols[header.InstanceNumber])
+		intInstance, err := strconv.Atoi(cols[headerIndices.InstanceNumber])
 		if err != nil {
-			// Ignore the error
 			intInstance = 0
 		}
 
-		_, hasOverlay := overlaysExist[overlayFilename(cols[header.Dicom])]
-		_, hasAutomatedOverlay := automatedOverlaysExist[overlayFilename(cols[header.Dicom])]
+		_, hasOverlay := overlaysExist[overlayFilename(cols[headerIndices.Dicom])]
+		_, hasAutomatedOverlay := automatedOverlaysExist[overlayFilename(cols[headerIndices.Dicom])]
+
+		// Build metadata from columns not explicitly handled.
+		metadata := make(map[string]string)
+		for j, colName := range headers {
+			if j != headerIndices.Zip &&
+				j != headerIndices.Dicom &&
+				j != headerIndices.Series &&
+				j != headerIndices.InstanceNumber {
+				metadata[colName] = cols[j]
+			}
+		}
 
 		output = append(output, Manifest{
-			Zip:                   cols[header.Zip],
-			Dicom:                 cols[header.Dicom],
-			Series:                cols[header.Series],
+			Zip:                   cols[headerIndices.Zip],
+			Dicom:                 cols[headerIndices.Dicom],
+			Series:                cols[headerIndices.Series],
 			InstanceNumber:        intInstance,
 			HasOverlayFromProject: hasOverlay,
 			HasAutomatedOverlay:   hasAutomatedOverlay,
+			Metadata:              metadata, // assign the extra metadata
 		})
 	}
 

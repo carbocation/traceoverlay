@@ -80,6 +80,13 @@ id="imgCanvas"
 width="128" 
 height="85"></canvas> -->
 
+
+<div>
+{{range $kKey, $kValue := $.Data.ManifestEntry.Metadata}}
+    <div>{{$kKey}}: {{$kValue}}</div>
+{{end}}
+</div>
+
 <script>
     {{/* Pre-existing annotation  - only populate if it exists. */}}
     var preExistingImage = document.createElement("img");
