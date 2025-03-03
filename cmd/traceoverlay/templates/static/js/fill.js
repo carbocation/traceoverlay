@@ -1,82 +1,60 @@
 // Via https://codepen.io/Geeyoam/pen/vLGZzG
 function floodFill(newColor, x, y) {
-
     // Permit #FFFFFF-style color definitions
-    if(newColor.search("#") >= 0) {
-        newColor = hexToRGBA(newColor)
+    if (newColor.search("#") >= 0) {
+        newColor = hexToRGBA(newColor);
     }
 
-    x = Math.floor(x)
-    y = Math.floor(y)
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
-    const { width, height, data } = imageData
-    const stack = []
-    const baseColor = getColorAtPixel(imageData, x, y)
-    let operator = { x, y }
+    x = Math.floor(x);
+    y = Math.floor(y);
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const { width, height } = imageData;
+    const baseColor = getColorAtPixel(imageData, x, y);
 
-    // Check if base color and new color are the same
-    if (colorMatch(baseColor, newColor)) {
-        return
+    // Create an array to track visited pixels.
+    const visited = new Array(width * height).fill(false);
+    
+    // Helper function to compute index in the visited array.
+    function getIndex(x, y) {
+        return y * width + x;
     }
 
-    // console.log(baseColor, newColor);
-
-    // Add the clicked location to stack
-    stack.push({ x: operator.x, y: operator.y })
+    const stack = [];
+    stack.push({ x, y });
 
     while (stack.length) {
-        operator = stack.pop()
-        let contiguousDown = true // Vertical is assumed to be true
-        let contiguousUp = true // Vertical is assumed to be true
-        let contiguousLeft = false
-        let contiguousRight = false
+        const { x: currentX, y: currentY } = stack.pop();
 
-        // Move to top most contiguousDown pixel
-        while (contiguousUp && operator.y >= 0) {
-            var yVal = operator.y - 1
-            contiguousUp = colorMatch(getColorAtPixel(imageData, operator.x, yVal), baseColor)
-
-            // Only decrement operator.y if we didn't roll out of bounds
-            if(contiguousUp) {
-                operator.y--
-            }
+        // Skip if out of bounds.
+        if (currentX < 0 || currentX >= width || currentY < 0 || currentY >= height) {
+            continue;
         }
 
-        // Move downward
-        while (contiguousDown && operator.y < height) {
-            setColorAtPixel(imageData, newColor, operator.x, operator.y)
-
-            // Check left
-            if (operator.x - 1 >= 0 && colorMatch(getColorAtPixel(imageData, operator.x - 1, operator.y), baseColor)) {
-                if (!contiguousLeft) {
-                    contiguousLeft = true
-                    stack.push({ x: operator.x - 1, y: operator.y })
-                }
-            } else {
-                contiguousLeft = false
-            }
-
-            // Check right
-            if (operator.x + 1 < width && colorMatch(getColorAtPixel(imageData, operator.x + 1, operator.y), baseColor)) {
-                if (!contiguousRight) {
-                    stack.push({ x: operator.x + 1, y: operator.y })
-                    contiguousRight = true
-                }
-            } else {
-                contiguousRight = false
-            }
-
-            var yVal = operator.y + 1
-            contiguousDown = colorMatch(getColorAtPixel(imageData, operator.x, yVal), baseColor)
-
-            // Only increment operator.y if we didn't roll out of bounds
-            if(contiguousDown) {
-                operator.y++
-            }
+        const idx = getIndex(currentX, currentY);
+        if (visited[idx]) {
+            continue;
         }
+        visited[idx] = true;
+
+        // For debugging: log the current pixel.
+        // console.log("Filling pixel:", currentX, currentY);
+
+        // If the pixel doesn't match the baseColor, skip it.
+        if (!colorMatch(getColorAtPixel(imageData, currentX, currentY), baseColor)) {
+            continue;
+        }
+
+        // Fill the current pixel.
+        setColorAtPixel(imageData, newColor, currentX, currentY);
+
+        // Add neighbors to the stack.
+        stack.push({ x: currentX + 1, y: currentY });
+        stack.push({ x: currentX - 1, y: currentY });
+        stack.push({ x: currentX, y: currentY + 1 });
+        stack.push({ x: currentX, y: currentY - 1 });
     }
 
-    context.putImageData(imageData, 0, 0)
+    context.putImageData(imageData, 0, 0);
 }
 
 function getColorAtPixel(imageData, x, y) {
