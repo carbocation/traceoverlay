@@ -24,6 +24,8 @@ type Global struct {
 	manifest []Manifest
 
 	Config overlay.JSONConfig
+
+	AutomatedLabelPath string
 }
 
 func (g *Global) Manifest() []Manifest {

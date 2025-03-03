@@ -401,7 +401,7 @@ function fullyShade(shadeAlpha) {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     for (var i = 0; i < numPixels; i++) {
-        if (pixels[i*4+3] <= 32) {
+        if (pixels[i*4+3] <= 16) {
             pixels[i*4+3] = 0;
         } else {
             pixels[i*4+3] = shadeAlpha;
@@ -592,7 +592,10 @@ function toggleVisibilityRev() {
         return "Hiding"
     } else if(canvasVisibility == "hidden") {
         canvasVisibility = "opaque";
+        // First fully shade, then redraw from the beginning
+        fullyShade(saveAlpha);
         redrawAll();
+        // And then finally shade again
         fullyShade(saveAlpha);
 
         return "Max Opacity"

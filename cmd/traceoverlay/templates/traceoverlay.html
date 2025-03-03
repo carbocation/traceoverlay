@@ -29,6 +29,7 @@
 {{end}}
 
 {{define "page"}}
+<span>{{if $.Data.HasManualOverlay}}✅{{else}}{{end}}</span>
 <span>Project: <a href="/listproject">{{$.Data.Project}}</a>. </span>
 <span><a id="skiplink" href="/traceoverlay/{{add 1 $.Data.ManifestIndex}}">[Skip] </a> </span>
 <span>{{$.Data.ManifestIndex}}. Zip: {{$.Data.ManifestEntry.Zip}}. Dicom: {{$.Data.ManifestEntry.Dicom}}</span>
@@ -79,6 +80,13 @@ id="imgCanvas"
 width="128" 
 height="85"></canvas> -->
 
+
+<div>
+{{range $kKey, $kValue := $.Data.ManifestEntry.Metadata}}
+    <div>{{$kKey}}: {{$kValue}}</div>
+{{end}}
+</div>
+
 <script>
     {{/* Pre-existing annotation  - only populate if it exists. */}}
     var preExistingImage = document.createElement("img");
@@ -118,7 +126,7 @@ height="85"></canvas> -->
 {{end}}
 
 </script>
-<script>
+<!-- <script>
     function rePosition() {
         var drag = document.getElementById("drawmessage");
 
@@ -129,7 +137,7 @@ height="85"></canvas> -->
     window.addEventListener('scroll', function(e){
         rePosition();
     })
-</script>
+</script> -->
 
 <script src="{{.Assets}}/js/traceoverlay.js"></script>
 <script src="{{.Assets}}/js/bmp.js"></script>

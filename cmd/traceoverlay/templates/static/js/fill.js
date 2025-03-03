@@ -107,7 +107,10 @@ function setColorAtPixel(imageData, color, x, y) {
 }
 
 function colorMatch(a, b) {
-    return a.r === b.r && a.g === b.g && a.b === b.b && a.a === b.a
+    // return a.r === b.r && a.g === b.g && a.b === b.b && a.a === b.a
+
+    // Ignore alpha, just compare r, b, and g channels
+    return a.r === b.r && a.g === b.g && a.b === b.b
 }
 
 function hexToRGBA(hexStr) {

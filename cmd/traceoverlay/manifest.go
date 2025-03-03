@@ -17,6 +17,8 @@ type Manifest struct {
 	Series                string
 	InstanceNumber        int
 	HasOverlayFromProject bool
+	HasAutomatedOverlay   bool
+	Metadata              map[string]string
 }
 
 func (m Manifest) OverlayFilename() string {
@@ -63,7 +65,7 @@ func UpdateManifest() error {
 }
 
 // ReadManifest takes the path to a manifest file and extracts each line.
-func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error) {
+func ReadManifest(manifestPath, labelPath, automatedLabelPath, imagePath string) ([]Manifest, error) {
 	// First, look in the labelPath to see if there are any annotations.
 	files, err := ioutil.ReadDir(filepath.Join(labelPath))
 	if os.IsNotExist(err) {
@@ -77,6 +79,22 @@ func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error)
 			continue
 		}
 		overlaysExist[f.Name()] = struct{}{}
+	}
+
+	// Also look in the automatedLabelPath to see if there are any annotations
+	// in the automated folder.
+	files, err = ioutil.ReadDir(filepath.Join(automatedLabelPath))
+	if os.IsNotExist(err) {
+		// Not a problem
+	} else if err != nil {
+		return nil, err
+	}
+	automatedOverlaysExist := make(map[string]struct{})
+	for _, f := range files {
+		if f.IsDir() {
+			continue
+		}
+		automatedOverlaysExist[f.Name()] = struct{}{}
 	}
 
 	var recs [][]string
@@ -132,7 +150,8 @@ func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error)
 
 	output := make([]Manifest, 0, len(recs))
 
-	header := struct {
+	var headers []string
+	headerIndices := struct {
 		Zip            int
 		Dicom          int
 		Series         int
@@ -141,72 +160,54 @@ func ReadManifest(manifestPath, labelPath, imagePath string) ([]Manifest, error)
 
 	for i, cols := range recs {
 		if i == 0 {
+			// Capture header row.
+			headers = cols
 			for j, col := range cols {
-				if col == "zip_file" {
-					header.Zip = j
-				} else if col == "dicom_file" {
-					header.Dicom = j
-				} else if col == "series" {
-					header.Series = j
-				} else if col == "instance_number" {
-					header.InstanceNumber = j
+				switch col {
+				case "zip_file":
+					headerIndices.Zip = j
+				case "dicom_file":
+					headerIndices.Dicom = j
+				case "series":
+					headerIndices.Series = j
+				case "instance_number":
+					headerIndices.InstanceNumber = j
 				}
 			}
 			continue
 		}
 
-		intInstance, err := strconv.Atoi(cols[header.InstanceNumber])
+		intInstance, err := strconv.Atoi(cols[headerIndices.InstanceNumber])
 		if err != nil {
-			// Ignore the error
 			intInstance = 0
 		}
 
-		_, hasOverlay := overlaysExist[overlayFilename(cols[header.Dicom])]
+		_, hasOverlay := overlaysExist[overlayFilename(cols[headerIndices.Dicom])]
+		_, hasAutomatedOverlay := automatedOverlaysExist[overlayFilename(cols[headerIndices.Dicom])]
+
+		// Build metadata from columns not explicitly handled.
+		metadata := make(map[string]string)
+		for j, colName := range headers {
+			if j != headerIndices.Zip &&
+				j != headerIndices.Dicom &&
+				j != headerIndices.Series &&
+				j != headerIndices.InstanceNumber {
+				metadata[colName] = cols[j]
+			}
+		}
 
 		output = append(output, Manifest{
-			Zip:                   cols[header.Zip],
-			Dicom:                 cols[header.Dicom],
-			Series:                cols[header.Series],
+			Zip:                   cols[headerIndices.Zip],
+			Dicom:                 cols[headerIndices.Dicom],
+			Series:                cols[headerIndices.Series],
 			InstanceNumber:        intInstance,
 			HasOverlayFromProject: hasOverlay,
+			HasAutomatedOverlay:   hasAutomatedOverlay,
+			Metadata:              metadata, // assign the extra metadata
 		})
 	}
 
-	// Don't sort the manifest - use the manifest order as the sort order
-	// sort.Slice(output, generateManifestSorter(output))
+	// Don't sort the manifest - use the manifest line order as the sort order
 
 	return output, nil
-}
-
-// generateManifestSorter is a convenience function to help sort a list of
-// manifest objects
-func generateManifestSorter(output []Manifest) func(i, j int) bool {
-	return func(i, j int) bool {
-		// Need both conditions so that ties will proceed to the next check
-		if output[i].Zip < output[j].Zip {
-			return true
-		} else if output[i].Zip > output[j].Zip {
-			return false
-		}
-
-		if output[i].Series < output[j].Series {
-			return true
-		} else if output[i].Series > output[j].Series {
-			return false
-		}
-
-		if output[i].InstanceNumber < output[j].InstanceNumber {
-			return true
-		} else if output[i].InstanceNumber > output[j].InstanceNumber {
-			return false
-		}
-
-		if output[i].Dicom < output[j].Dicom {
-			return true
-		} else if output[i].Dicom > output[j].Dicom {
-			return false
-		}
-
-		return false
-	}
 }
