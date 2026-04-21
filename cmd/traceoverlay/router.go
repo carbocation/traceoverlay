@@ -23,6 +23,8 @@ func router(config *Global) (http.Handler, error) {
 	GET.HandleFunc("/traceoverlay/cine/{zip}/{series}", h.TraceOverlayCINE).Name("traceoverlay_cine")
 	GET.HandleFunc("/traceoverlay/cinehtml/{zip}/{series}", h.TraceOverlayCINEHTML).Name("traceoverlay_cinehtml")
 	GET.HandleFunc("/listproject", h.ListProject).Name("listproject")
+	GET.HandleFunc("/predict/models", h.PredictModels).Name("predict_models")
+	GET.HandleFunc("/predict/{manifest_index:[0-9]+}", h.Predict).Name("predict")
 
 	//
 	// POST

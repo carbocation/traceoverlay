@@ -53,11 +53,13 @@ func main() {
 	log.Println(os.Args)
 
 	var automatedLabelPath string
+	var inferenceURL string
 
 	jsonConfig := flag.String("config", "", "Path to JSON file with configuration.")
 	port := flag.Int("port", 9019, "Port for HTTP server")
 	previewAlpha := flag.Int("alpha", 0, "Alpha value for preview images from 1 (min) to 255 (max). Default is 160 if left at 0 or unset.")
 	flag.StringVar(&automatedLabelPath, "automated_labels", "", "Analogous to the label_path argument in the config file, but this will not count as completed. Therefore, this folder can be used to review automated labels or precomputed labels while only saving those that require modification. (Optional)")
+	flag.StringVar(&inferenceURL, "inference_url", "", "Base URL of a running inferd PyTorch inference service, e.g. http://localhost:8081. Enables the Predict button in the annotation UI. (Optional)")
 	flag.Parse()
 
 	if *jsonConfig == "" {
@@ -132,6 +134,7 @@ func main() {
 
 		Config:             config,
 		AutomatedLabelPath: automatedLabelPath,
+		InferenceURL:       inferenceURL,
 	}
 
 	global.log.Println("Launching", global.Site)

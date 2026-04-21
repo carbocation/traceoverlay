@@ -26,6 +26,7 @@ type Global struct {
 	Config overlay.JSONConfig
 
 	AutomatedLabelPath string
+	InferenceURL       string
 }
 
 func (g *Global) Manifest() []Manifest {

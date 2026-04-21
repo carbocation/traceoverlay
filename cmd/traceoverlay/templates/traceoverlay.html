@@ -63,6 +63,12 @@
 
 <button class="btn btn-info" onclick="javascript:saveCanvas();">Save Overlay to Server</button>
 <button class="btn btn-default btn-sm" onclick="javascript:downloadCanvas();">Download</button>
+{{if $.Data.InferenceURL}}
+<span id="inferWidget" style="margin-left:8px;">
+    <select id="inferSelect" class="form-control" style="display:inline-block;width:auto;vertical-align:middle;" title="Select a model"></select>
+    <button class="btn btn-warning" id="predictBtn" onclick="javascript:predict();" disabled style="vertical-align:middle;">⊹ Predict</button>
+</span>
+{{end}}
 <br />
 <br />
 
@@ -139,6 +145,16 @@ height="85"></canvas> -->
     })
 </script> -->
 
+<script>
+// Map of label ID (int) -> hex color string, used by the predict merge logic.
+var labelColors = {
+{{range $.Data.Labels}}  {{.ID}}: "{{.Color}}",
+{{end}}};
+{{if $.Data.InferenceURL}}
+var inferenceURL = {{$.Data.InferenceURL | printf "%q"}};
+var manifestIndex = {{$.Data.ManifestIndex}};
+{{end}}
+</script>
 <script src="{{.Assets}}/js/traceoverlay.js"></script>
 <script src="{{.Assets}}/js/bmp.js"></script>
 <script src="{{.Assets}}/js/fill.js"></script>

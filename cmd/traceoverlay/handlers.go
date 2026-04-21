@@ -53,8 +53,36 @@ func (h *handler) ListProject(w http.ResponseWriter, r *http.Request) {
 	Render(h, w, r, "List Project", "listproject.html", output, nil)
 }
 
+// fetchImage loads the image for the given manifest index from wherever it lives
+// (local filesystem, DICOM zip, or Google Cloud Storage).
+func (h *handler) fetchImage(manifestIndex int) (image.Image, error) {
+	manifestEntry := h.Global.Manifest()[manifestIndex]
+	switch {
+	case strings.HasPrefix(h.Config.ImagePath, "gs://") && !h.Config.PreParsed:
+		client, err := getGSClient()
+		if err != nil {
+			return nil, err
+		}
+		return bulkprocess.ExtractDicomFromGoogleStorage(
+			fmt.Sprintf("%s/%s", h.Config.ImagePath, manifestEntry.Zip),
+			manifestEntry.Dicom, true, client)
+	case strings.HasPrefix(h.Config.ImagePath, "gs://") && h.Config.PreParsed:
+		client, err := getGSClient()
+		if err != nil {
+			return nil, err
+		}
+		return bulkprocess.MaybeExtractImageFromGoogleStorage(
+			fmt.Sprintf("%s/%s", h.Config.ImagePath, manifestEntry.Dicom), client)
+	case h.Config.PreParsed:
+		return bulkprocess.ExtractImageFromLocalFile(manifestEntry.Dicom, h.Config.ImageSuffix, h.Config.ImagePath)
+	default:
+		pathPart := path.Dir(h.ManifestPath)
+		return bulkprocess.ExtractDicomFromLocalFile(
+			fmt.Sprintf("%s/%s", pathPart, manifestEntry.Zip), manifestEntry.Dicom, true)
+	}
+}
+
 func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
-	// Fetch the desired image from the zip file as described in the manifest
 	manifestIdx := mux.Vars(r)["manifest_index"]
 	manifestIndex, err := strconv.Atoi(manifestIdx)
 	if err != nil {
@@ -68,32 +96,8 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 	}
 
 	manifestEntry := h.Global.Manifest()[manifestIndex]
-	var im image.Image
 
-	if strings.HasPrefix(h.Global.Config.ImagePath, "gs://") && !h.Global.Config.PreParsed {
-		// Google Storage
-		client, err := getGSClient()
-		if err != nil {
-			HTTPError(h, w, r, err)
-			return
-		}
-		im, err = bulkprocess.ExtractDicomFromGoogleStorage(fmt.Sprintf("%s/%s", h.Global.Config.ImagePath, manifestEntry.Zip),
-			manifestEntry.Dicom,
-			true,
-			client)
-	} else if strings.HasPrefix(h.Global.Config.ImagePath, "gs://") && h.Global.Config.PreParsed {
-		client, err := getGSClient()
-		if err != nil {
-			HTTPError(h, w, r, err)
-			return
-		}
-		im, err = bulkprocess.MaybeExtractImageFromGoogleStorage(fmt.Sprintf("%s/%s", h.Global.Config.ImagePath, manifestEntry.Dicom), client)
-	} else if h.Global.Config.PreParsed && !strings.HasPrefix(h.Global.Config.ImagePath, "gs://") {
-		im, err = bulkprocess.ExtractImageFromLocalFile(manifestEntry.Dicom, h.Global.Config.ImageSuffix, h.Global.Config.ImagePath)
-	} else {
-		pathPart := path.Dir(h.Global.ManifestPath)
-		im, err = bulkprocess.ExtractDicomFromLocalFile(fmt.Sprintf("%s/%s", pathPart, manifestEntry.Zip), manifestEntry.Dicom, true)
-	}
+	im, err := h.fetchImage(manifestIndex)
 	if err != nil {
 		HTTPError(h, w, r, err)
 		return
@@ -181,6 +185,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		BrushSize           int
 		PreviewAlpha        int
 		Labels              []overlay.Label
+		InferenceURL        string
 	}{
 		h.Global.Project,
 		manifestEntry,
@@ -195,6 +200,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		h.Config.BrushSize,
 		h.PreviewAlpha,
 		h.Config.Labels.Sorted(),
+		h.InferenceURL,
 	}
 
 	Render(h, w, r, "Trace Overlay", "traceoverlay.html", output, nil)

@@ -1,0 +1,58 @@
+# inferd model configuration — copy to models.yaml and edit.
+#
+# Each model is a TorchScript traced module (.pt file) loaded via
+# torch.jit.load(). The preprocessing config (input_size, normalize,
+# input_channels) must match what was used during training.
+#
+# output_map controls which model output categories are painted onto the
+# traceoverlay canvas and which are ignored:
+#
+#   - Omit output_map (or set to null): naive mode — category 0 is skipped
+#     (background), category N is painted using the traceoverlay label whose
+#     ID equals N.
+#
+#   - Provide output_map: explicit mode — each category key is either "ignore"
+#     (leave existing annotations untouched) or a traceoverlay label ID (int).
+#     Use this for iterative-refinement workflows, e.g. training a small model
+#     for a new structure and mapping its foreground class to a new label ID
+#     without disturbing existing manual traces of other structures.
+
+models:
+  # ── Example: full-replace mode (naive, no output_map) ───────────────────
+  aorta_v1:
+    path: /path/to/aorta_v1_traced.pt
+    device: cuda:0       # or "cpu"
+    input_channels: 1    # 1 = grayscale, 3 = RGB
+    input_size: 256      # model input is resized to input_size × input_size
+    normalize:
+      mean: [0.5]
+      std: [0.25]
+    # No output_map → category 0 skipped, category 1 painted as label 1, etc.
+
+  # ── Example: iterative-refinement mode (explicit output_map) ────────────
+  new_structure_v1:
+    path: /path/to/new_structure_traced.pt
+    device: cuda:0
+    input_channels: 1
+    input_size: 224
+    normalize:
+      mean: [0.5]
+      std: [0.25]
+    output_map:
+      0: ignore   # background — leave existing manual annotations untouched
+      1: 6        # foreground — paint as traceoverlay label ID 6
+
+  # ── Example: multi-class with selective mapping ──────────────────────────
+  multi_structure_v2:
+    path: /path/to/multi_traced.pt
+    device: cuda:0
+    input_channels: 1
+    input_size: 256
+    normalize:
+      mean: [0.5]
+      std: [0.25]
+    output_map:
+      0: ignore   # background
+      1: 3        # structure A → label 3
+      2: 4        # structure B → label 4
+      3: ignore   # uncertain class — don't paint

@@ -433,7 +433,14 @@ function redrawAll() {
     for (var i = 0; i < points.length; i++) {
 
         var pt = points[i];
-        // console.log(pt.color);
+
+        if (pt.mode === "snapshot") {
+            // Restore a full canvas snapshot (used by the Predict undo path).
+            // putImageData bypasses compositing, so the prior drawImage is overwritten.
+            context.globalCompositeOperation = "source-over";
+            context.putImageData(pt.imageData, 0, 0);
+            continue;
+        }
 
         if(pt.brush == "eraser") {
             context.globalCompositeOperation="destination-out";
@@ -693,4 +700,133 @@ function changeBrush(dir) {
     setBrushColor(rgb2hex(window.getComputedStyle(elem, null).getPropertyValue('background-color')));
 
     return elem.textContent;
+}
+
+// ─── Inference / Predict ────────────────────────────────────────────────────
+
+// Populate the model dropdown from the inference service on page load.
+// Only runs when inferenceURL is injected by the Go template.
+if (typeof inferenceURL !== "undefined" && inferenceURL) {
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("/predict/models")
+            .then(function (resp) { return resp.json(); })
+            .then(function (models) {
+                var sel = document.getElementById("inferSelect");
+                var btn = document.getElementById("predictBtn");
+                if (!sel || !btn) return;
+                models.forEach(function (m) {
+                    var opt = document.createElement("option");
+                    opt.value = m.name;
+                    opt.textContent = m.name;
+                    sel.appendChild(opt);
+                });
+                if (models.length > 0) {
+                    btn.disabled = false;
+                }
+            })
+            .catch(function (err) {
+                flashMessage("Could not reach inference service: " + err.message);
+            });
+    });
+}
+
+// Send the current image to the inference service and merge the returned mask
+// onto the canvas according to the model's output_map.
+function predict() {
+    var sel = document.getElementById("inferSelect");
+    if (!sel || !sel.value) {
+        flashMessage("No model selected");
+        return;
+    }
+
+    var btn = document.getElementById("predictBtn");
+    btn.disabled = true;
+    var origLabel = btn.textContent;
+    btn.textContent = "⊹ Predicting…";
+
+    // Snapshot the full canvas now so the user can undo the entire predict
+    // action with one press, even if they draw on top before the response
+    // arrives. If the request fails the snapshot is a harmless no-op entry.
+    var snap = context.getImageData(0, 0, canvas.width, canvas.height);
+    points.push({ mode: "snapshot", imageData: snap });
+
+    fetch("/predict/" + manifestIndex + "?model=" + encodeURIComponent(sel.value))
+        .then(function (resp) {
+            if (!resp.ok) {
+                return resp.text().then(function (t) { throw new Error(t); });
+            }
+            return resp.json();
+        })
+        .then(function (data) {
+            applyPrediction(data.mask_b64, data.output_map);
+        })
+        .catch(function (err) {
+            flashMessage("Prediction failed: " + err.message);
+        })
+        .then(function () {
+            // always-runs cleanup (replaces .finally for broader compat)
+            btn.disabled = false;
+            btn.textContent = origLabel;
+        });
+}
+
+// Merge the returned mask PNG into the current canvas.
+//
+// outputMap controls which model categories affect which label IDs:
+//   null / undefined → naive mode: category 0 = background (skip),
+//                      category N → labelColors[N]
+//   { "0": "ignore", "1": 6 } → explicit mode: map or skip per entry
+//
+// hexToRGBA and labelColors are available at call time (fill.js already
+// loaded, labelColors injected by the Go template).
+function applyPrediction(maskB64, outputMap) {
+    var predImg = new Image();
+    predImg.onload = function () {
+        // Decode prediction into a temp canvas (nearest-neighbor, no smoothing).
+        var tmp = document.createElement("canvas");
+        tmp.width  = canvas.width;
+        tmp.height = canvas.height;
+        var tc = tmp.getContext("2d");
+        tc.imageSmoothingEnabled        = false;
+        tc.mozImageSmoothingEnabled     = false;
+        tc.webkitImageSmoothingEnabled  = false;
+        tc.msImageSmoothingEnabled      = false;
+        tc.drawImage(predImg, 0, 0, canvas.width, canvas.height);
+        var predPx = tc.getImageData(0, 0, canvas.width, canvas.height).data;
+
+        var current = context.getImageData(0, 0, canvas.width, canvas.height);
+        var px = current.data;
+        var n = canvas.width * canvas.height;
+
+        for (var i = 0; i < n; i++) {
+            // Prediction PNG is grayscale (R = G = B = category index).
+            var category = predPx[i * 4];
+            var color;
+
+            if (outputMap === null || outputMap === undefined) {
+                // Naive mode: skip background (0), identity-map everything else.
+                if (category === 0) continue;
+                color = labelColors[category];
+            } else {
+                var mapping = outputMap[String(category)];
+                if (mapping === undefined || mapping === "ignore") continue;
+                color = labelColors[mapping];
+            }
+
+            if (!color) continue;
+
+            var rgba = hexToRGBA(color);
+            px[i * 4]     = rgba.r;
+            px[i * 4 + 1] = rgba.g;
+            px[i * 4 + 2] = rgba.b;
+            px[i * 4 + 3] = previewAlpha;
+        }
+
+        context.putImageData(current, 0, 0);
+        flashMessage("Prediction applied — Undo to revert");
+    };
+    predImg.onerror = function () {
+        flashMessage("Failed to decode prediction image");
+    };
+    predImg.src = "data:image/png;base64," + maskB64;
 }
