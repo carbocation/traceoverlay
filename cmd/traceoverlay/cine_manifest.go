@@ -21,6 +21,11 @@ var cineManifestPath string
 var cineBulkPath string
 var cineLookup = make(map[cineZip]map[cineSeriesID][]cineValue)
 
+// cineInitialized is guarded by cineMutex. It is distinct from
+// len(cineLookup) == 0 so that a valid manifest with no usable entries isn't
+// re-parsed on every request.
+var cineInitialized bool
+
 type cineZip string
 type cineSeriesID string
 
@@ -65,6 +70,11 @@ func initializeCINEManifest(manMap map[string]struct{}) error {
 
 	head := make(map[string]int)
 
+	// Build into a local map and publish only on success, so a failure partway
+	// through doesn't leave cineLookup partially populated (which would prevent
+	// the initialization from being retried).
+	lookup := make(map[cineZip]map[cineSeriesID][]cineValue)
+
 	for i := 0; ; i++ {
 		line, err := r.Read()
 		if err == io.EOF {
@@ -101,7 +111,7 @@ func initializeCINEManifest(manMap map[string]struct{}) error {
 		}
 		value := cineValue{Dicom: line[head[CineColDicom]], InstanceNumber: intInstanceNumber, Series: seriesKey}
 
-		zipMap, exists := cineLookup[zipKey]
+		zipMap, exists := lookup[zipKey]
 		seriesList := zipMap[seriesKey]
 		seriesList = append(seriesList, value)
 
@@ -110,8 +120,11 @@ func initializeCINEManifest(manMap map[string]struct{}) error {
 		}
 
 		zipMap[seriesKey] = seriesList
-		cineLookup[zipKey] = zipMap
+		lookup[zipKey] = zipMap
 	}
+
+	cineLookup = lookup
+	cineInitialized = true
 
 	return nil
 }
@@ -119,12 +132,12 @@ func initializeCINEManifest(manMap map[string]struct{}) error {
 func CINEFetchDicomNames(manMap map[string]struct{}, Zip, Series string) ([]string, error) {
 
 	cineMutex.RLock()
-	if len(cineLookup) == 0 {
+	if !cineInitialized {
 		cineMutex.RUnlock()
 		cineMutex.Lock()
 
 		// Make sure that it wasn't changed while we were waiting for the lock
-		if len(cineLookup) == 0 {
+		if !cineInitialized {
 			if err := initializeCINEManifest(manMap); err != nil {
 				cineMutex.Unlock()
 				return nil, err
@@ -158,12 +171,12 @@ func CINEFetchDicomNames(manMap map[string]struct{}, Zip, Series string) ([]stri
 func CINEFetchAllDicomNames(manMap map[string]struct{}, Zip string) ([]string, []string, error) {
 
 	cineMutex.RLock()
-	if len(cineLookup) == 0 {
+	if !cineInitialized {
 		cineMutex.RUnlock()
 		cineMutex.Lock()
 
 		// Make sure that it wasn't changed while we were waiting for the lock
-		if len(cineLookup) == 0 {
+		if !cineInitialized {
 			if err := initializeCINEManifest(manMap); err != nil {
 				cineMutex.Unlock()
 				return nil, nil, err

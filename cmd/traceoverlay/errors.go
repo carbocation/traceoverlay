@@ -7,9 +7,10 @@ import (
 )
 
 func JSONError(h *handler, w http.ResponseWriter, r *http.Request, err error, code ...int) {
-	unifiedError(h, w, r, err, code...)
-
+	// Headers must be set before unifiedError calls WriteHeader
 	w.Header().Set("Content-Type", "application/json")
+
+	unifiedError(h, w, r, err, code...)
 	enc := json.NewEncoder(w)
 	enc.SetEscapeHTML(false)
 	_ = enc.Encode(struct {

@@ -46,6 +46,11 @@ func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 	// series are provided, we can use them directly.
 	var zipFile, series string
 
+	if cineBulkPath == "" || cineManifestPath == "" {
+		HTTPError(h, w, r, fmt.Errorf("This program is not CINE-enabled"))
+		return
+	}
+
 	if mux.Vars(r)["manifest_index"] != "" {
 
 		manifestIdx := mux.Vars(r)["manifest_index"]
@@ -63,11 +68,6 @@ func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 		manifestEntry := h.Global.Manifest()[manifestIndex]
 		zipFile = manifestEntry.Zip
 		series = manifestEntry.Series
-
-		if cineBulkPath == "" || cineManifestPath == "" {
-			HTTPError(h, w, r, fmt.Errorf("This program is not CINE-enabled"))
-			return
-		}
 	} else {
 		zipFile = mux.Vars(r)["zip"]
 		series = mux.Vars(r)["series"]
