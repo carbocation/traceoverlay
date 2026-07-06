@@ -268,6 +268,7 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 	f, err := os.Create(filepath.Join(global.Config.LabelPath, manifestEntry.OverlayFilename()))
 	if err != nil {
 		HTTPError(h, w, r, err)
+		return
 	}
 	defer f.Close()
 
