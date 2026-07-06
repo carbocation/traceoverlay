@@ -139,6 +139,7 @@ func ReadManifest(manifestPath, labelPath, automatedLabelPath, imagePath string)
 		if err != nil {
 			return nil, err
 		}
+		defer f.Close()
 
 		cr := csv.NewReader(f)
 		cr.Comma = '\t'

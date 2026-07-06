@@ -137,7 +137,10 @@ func CINEFetchDicomNames(manMap map[string]struct{}, Zip, Series string) ([]stri
 	defer cineMutex.RUnlock()
 
 	zipMap := cineLookup[cineZip(Zip)]
-	value := zipMap[cineSeriesID(Series)]
+
+	// Sort a copy, since sorting the map's slice in place would mutate shared
+	// state while holding only a read lock.
+	value := append([]cineValue{}, zipMap[cineSeriesID(Series)]...)
 
 	sort.Slice(value, func(i, j int) bool { return value[i].InstanceNumber < value[j].InstanceNumber })
 

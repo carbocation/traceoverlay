@@ -114,6 +114,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 			}
 
 			img, err := png.Decode(f)
+			f.Close()
 			if err != nil {
 				break
 			}
@@ -141,6 +142,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 			}
 
 			img, err := png.Decode(f)
+			f.Close()
 			if err != nil {
 				break
 			}
@@ -170,10 +172,17 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 	}
 	encodedString := base64.StdEncoding.EncodeToString(imBuff.Bytes())
 
+	nextManifestIndex := manifestIndex + 1
+	if len(h.Global.Manifest()) <= nextManifestIndex {
+		// Back to the start if you roll over
+		nextManifestIndex = 0
+	}
+
 	output := struct {
 		Project             string
 		ManifestEntry       Manifest
 		ManifestIndex       int
+		NextManifestIndex   int
 		EncodedImage        string
 		Width               int
 		Height              int
@@ -188,6 +197,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		h.Global.Project,
 		manifestEntry,
 		manifestIndex,
+		nextManifestIndex,
 		strings.NewReplacer("\n", "", "\r", "").Replace(encodedString),
 		imBoundsX,
 		imBoundsY,
@@ -219,7 +229,7 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 	nextManifestIndex := manifestIndex + 1
 	if len(h.Global.Manifest()) <= nextManifestIndex {
 		// Back to the start if you roll over
-		nextManifestIndex = 1
+		nextManifestIndex = 0
 	}
 
 	output := struct {
