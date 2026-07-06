@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cloud.google.com/go/storage"
 	"github.com/carbocation/genomisc/overlay"
 	"github.com/carbocation/genomisc/ukbb/bulkprocess"
 	"github.com/gorilla/mux"
@@ -72,7 +73,8 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 
 	if strings.HasPrefix(h.Global.Config.ImagePath, "gs://") && !h.Global.Config.PreParsed {
 		// Google Storage
-		client, err := getGSClient()
+		var client *storage.Client
+		client, err = getGSClient()
 		if err != nil {
 			HTTPError(h, w, r, err)
 			return
@@ -82,7 +84,8 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 			true,
 			client)
 	} else if strings.HasPrefix(h.Global.Config.ImagePath, "gs://") && h.Global.Config.PreParsed {
-		client, err := getGSClient()
+		var client *storage.Client
+		client, err = getGSClient()
 		if err != nil {
 			HTTPError(h, w, r, err)
 			return
