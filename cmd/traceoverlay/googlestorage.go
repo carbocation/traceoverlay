@@ -35,7 +35,8 @@ func getGSClient() (*storage.Client, error) {
 		return gsClient, nil
 	}
 
-	gsClient, err := storage.NewClient(context.Background())
+	var err error
+	gsClient, err = storage.NewClient(context.Background())
 	gsMutex.Unlock()
 
 	return gsClient, err
