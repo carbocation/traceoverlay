@@ -55,7 +55,7 @@ func (h *handler) TraceOverlayCINE(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if manifestIndex >= len(h.Global.Manifest()) {
+		if manifestIndex < 0 || manifestIndex >= len(h.Global.Manifest()) {
 			HTTPError(h, w, r, fmt.Errorf("Manifest_index was %d, out of range of the Manifest slice", manifestIndex))
 			return
 		}

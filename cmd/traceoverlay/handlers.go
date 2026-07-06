@@ -63,7 +63,7 @@ func (h *handler) TraceOverlay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if manifestIndex >= len(h.Global.Manifest()) {
+	if manifestIndex < 0 || manifestIndex >= len(h.Global.Manifest()) {
 		HTTPError(h, w, r, fmt.Errorf("Manifest_index was %d, out of range of the Manifest slice", manifestIndex))
 		return
 	}
@@ -210,7 +210,7 @@ func (h *handler) TraceOverlayPost(w http.ResponseWriter, r *http.Request) {
 		HTTPError(h, w, r, fmt.Errorf("No manifest_index passed"))
 		return
 	}
-	if manifestIndex >= len(h.Global.Manifest()) {
+	if manifestIndex < 0 || manifestIndex >= len(h.Global.Manifest()) {
 		HTTPError(h, w, r, fmt.Errorf("Manifest_index was %d, out of range of the Manifest slice", manifestIndex))
 		return
 	}
